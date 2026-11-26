@@ -9,10 +9,9 @@
   const coarse = matchMedia("(hover: none), (pointer: coarse)").matches;
   if (coarse) hintText.textContent = "Touch the branch";
 
-  const IW = 2048, IH = 998;              // source picture size
-  const GW = 220, GH = 108;               // growth field, laid over the picture
-  const grow = new Float32Array(GW * GH);
-  const growBytes = new Uint8Array(GW * GH);
+  const IW = 2752, IH = 1340;             // source picture size (full resolution of the originals)
+  const GW = 440, GH = 214;               // growth field, laid over the picture (about 6px of picture per cell)
+  const grow = new Float32Array(GW * GH); // uploaded as a half-float texture, so the moss front never bands
 
   // where the branch runs in the picture (image uv, 0..1), used by the touch-screen wanderer
   const branchV = u => 0.655 - 0.035 * u;
@@ -74,20 +73,26 @@
     const sgx = cx - px, sgy = cy - py, sl = sgx * sgx + sgy * sgy || 1;
     prevC = c;
     const sx = cover.dw / GW, sy = cover.dh / GH;
+    // only cells near the cursor's path can rise; everywhere else just decays
+    let i0 = GW, i1 = -1, j0 = GH, j1 = -1;
+    if (c) {
+      i0 = Math.max(0, Math.floor((Math.min(px, cx) - R) / sx)); i1 = Math.min(GW - 1, Math.ceil((Math.max(px, cx) + R) / sx));
+      j0 = Math.max(0, Math.floor((Math.min(py, cy) - R) / sy)); j1 = Math.min(GH - 1, Math.ceil((Math.max(py, cy) + R) / sy));
+    }
     for (let j = 0; j < GH; j++) {
-        for (let i = 0; i < GW; i++) {
+      const rowIn = j >= j0 && j <= j1;
+      for (let i = 0; i < GW; i++) {
         const k = j * GW + i;
+        const g = grow[k];
         let t = 0;
-        if (c) {
+        if (rowIn && i >= i0 && i <= i1) {
           const qx = (i + 0.5) * sx, qy = (j + 0.5) * sy;
           const h = Math.min(1, Math.max(0, ((qx - px) * sgx + (qy - py) * sgy) / sl));
           const dx = qx - (px + sgx * h), ey = qy - (py + sgy * h);
           const d = Math.sqrt(dx * dx + ey * ey);
           if (d < R) { const x = Math.min(1, Math.max(0, (d - inner) / (R - inner))); t = Math.pow(1 - x, 1.6); }
-        }
-        const g = grow[k];
+        } else if (g < 1e-4) { if (g) grow[k] = 0; continue; }
         grow[k] = g + (t - g) * (t > g ? rise : fall);
-        growBytes[k] = grow[k] * 255;
       }
     }
   }
@@ -123,22 +128,43 @@
   float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.-2.*f);
     return mix(mix(hash(i), hash(i+vec2(1,0)), f.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y); }
   float fbm(vec2 p){ float s = 0., a = .5; for (int k = 0; k < 4; k++){ s += a * noise(p); p *= 2.03; a *= .5; } return s / .9375; }
+  // smooth (cubic B-spline) read of the growth field from four bilinear taps, so the coarse
+  // field never shows its grid as diamonds or steps along the moss front
+  float growAt(vec2 uv){
+    vec2 ts = vec2(textureSize(uGrow, 0));
+    vec2 st = uv * ts - .5, i = floor(st), f = st - i;
+    vec2 f2 = f*f, f3 = f2*f;
+    vec2 w0 = (1. - 3.*f + 3.*f2 - f3) / 6., w1 = (4. - 6.*f2 + 3.*f3) / 6.;
+    vec2 w2 = (1. + 3.*f + 3.*f2 - 3.*f3) / 6., w3 = f3 / 6.;
+    vec2 s0 = w0 + w1, s1 = w2 + w3;
+    vec2 o0 = (i - .5 + w1 / s0) / ts, o1 = (i + 1.5 + w3 / s1) / ts;
+    return mix(mix(texture(uGrow, vec2(o1.x, o1.y)).r, texture(uGrow, vec2(o0.x, o1.y)).r, s0.x),
+               mix(texture(uGrow, vec2(o1.x, o0.y)).r, texture(uGrow, vec2(o0.x, o0.y)).r, s0.x), s0.y);
+  }
   void main(){
     vec2 p = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
     vec2 uv = (p - uOff) / uSize;
     vec3 bare = texture(uBare, uv).rgb;
     vec3 moss = texture(uMoss, uv).rgb;
     vec2 mk = texture(uMask, uv).rg;           // r: where the picture changes (moss), g: flower heads
-    float g = texture(uGrow, uv).r;
-    // two scales of noise: broad patches plus fine tufts, so the front frays like real moss
-    float n = .5 * fbm(uv * vec2(16., 7.8) + vec2(uTime * .01, 0.)) + .5 * fbm(uv * vec2(130., 63.));
+    float g = growAt(uv);
+    // broad noise patches decide the overall shape of the front...
+    float n = .62 * fbm(uv * vec2(16., 7.8) + vec2(uTime * .01, 0.)) + .38 * fbm(uv * vec2(90., 44.));
+    // ...and the picture's own detail decides the fine edge: bright tufts and petals come through
+    // a little ahead of the shadows between them, so the front follows real clumps of moss
+    const vec3 L = vec3(.3, .59, .11);
+    float detail = dot(textureLod(uMoss, uv, 1.2).rgb, L) - dot(textureLod(uMoss, uv, 3.5).rgb, L);
+    detail *= smoothstep(.05, .45, mk.r);      // only on the moss itself, never in the open air or bare bark
     // moss takes hold first where it is thickest, then creeps out to the fronds
-    float th = -.05 + .95 * n - .2 * mk.r;
-    float m = smoothstep(th, th + .08, g);
+    float th = -.05 + .95 * n - .2 * mk.r - .4 * detail;
+    // a crisp but antialiased front: about a pixel and a half wide, plus a short soft fringe
+    float aa = max(fwidth(g - th) * 1.5, .004);
+    float m = smoothstep(-aa, aa + .03, g - th);
+    m *= smoothstep(.005, .05, g);            // never a stray tuft where nothing has grown
     // flowers open only once the moss around them is established
     float bt = th + .26;
     float bl = smoothstep(bt, bt + .14, g);
-    vec3 bud = textureLod(uMoss, uv, 4.5).rgb * vec3(.78, .9, .52);
+    vec3 bud = textureLod(uMoss, uv, 2.).rgb * vec3(.78, .9, .52);
     vec3 col = mix(moss, mix(bud, moss, bl), mk.g);
     col += mk.g * bl * (1. - bl) * .55;        // a small flash as each flower opens
     vec3 outc = mix(bare, col, m);
@@ -177,7 +203,7 @@
   }
   function drawGL(now) {
     gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, texGrow);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, GW, GH, 0, gl.RED, gl.UNSIGNED_BYTE, growBytes);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16F, GW, GH, 0, gl.RED, gl.FLOAT, grow);
     gl.uniform2f(uni.uRes, W, H); gl.uniform2f(uni.uOff, cover.ox, cover.oy); gl.uniform2f(uni.uSize, cover.dw, cover.dh);
     gl.uniform1f(uni.uTime, now / 1000);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
