@@ -7,30 +7,12 @@
 <meta name="description" content="A woodland garden you can visit every day of the year.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <script>
   (function () {
     var r = document.documentElement;
     r.classList.add("js");
     try { var t = localStorage.getItem("hm-theme"); if (t === "dark" || t === "light") r.setAttribute("data-theme", t); } catch (e) {}
-    // font pairing under review, applied before first paint
-    var FONTS = {
-      "fraunces-inter": "family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;1,9..144,300;1,9..144,400&family=Inter:wght@400;500;600",
-      "garamond-work": "family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Work+Sans:wght@400;500;600",
-      "dmserif-dmsans": "family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600",
-      "newsreader-instrument": "family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Instrument+Sans:wght@400;500;600",
-      "bricolage-sourceserif": "family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600"
-    };
-    window.HM_FONTS = FONTS;
-    try {
-      var f = localStorage.getItem("hm-fonts");
-      if (f && FONTS[f]) {
-        r.setAttribute("data-fonts", f);
-        var l = document.createElement("link"); l.rel = "stylesheet"; l.id = "font-" + f;
-        l.href = "https://fonts.googleapis.com/css2?" + FONTS[f] + "&display=swap";
-        document.head.appendChild(l);
-      }
-    } catch (e) {}
     // if the motion script never runs, show the headings anyway
     setTimeout(function () { r.classList.add("ready"); }, 2500);
   })();
@@ -56,11 +38,11 @@
   --petal-deep: #a9455f;      /* petal on daylight */
   --scrim: 20, 22, 13;
 
-  --f-display: "Cormorant", "Cormorant Garamond", Garamond, "Times New Roman", serif;
-  --f-body: "Hanken Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-display: "Bricolage Grotesque", "Helvetica Neue", Arial, system-ui, sans-serif;
+  --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --w-display: 300;
-  --fsa: none;               /* other pairings even out x-height so sizes stay comparable */
+  --w-display: 400;
+  --fsa: .43;                /* trims the grotesque's tall x-height to the scale the sizes were set on */
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-move: cubic-bezier(0.25, 1, 0.5, 1);
@@ -85,16 +67,9 @@
     --moss-deep: #c4cd70; --petal-deep: #eeb4c2;
     color-scheme: dark;
 }
-/* font pairings under review: the switcher sets data-fonts on <html> */
-:root[data-fonts="fraunces-inter"] { --f-display: "Fraunces", Georgia, serif; --f-body: "Inter", system-ui, sans-serif; --fsa: .43; }
-:root[data-fonts="garamond-work"] { --f-display: "Cormorant Garamond", Garamond, serif; --f-body: "Work Sans", system-ui, sans-serif; }
-:root[data-fonts="dmserif-dmsans"] { --f-display: "DM Serif Display", Georgia, serif; --f-body: "DM Sans", system-ui, sans-serif; --w-display: 400; --fsa: .4; }
-:root[data-fonts="newsreader-instrument"] { --f-display: "Newsreader", Georgia, serif; --f-body: "Instrument Sans", system-ui, sans-serif; --fsa: .43; }
-:root[data-fonts="bricolage-sourceserif"] { --f-display: "Bricolage Grotesque", system-ui, sans-serif; --f-body: "Source Serif 4", Georgia, serif; --w-display: 400; --fsa: .43; }
-:root[data-fonts="bricolage-sourceserif"] :is(.display, .hero h1, .interlude-quote, .big-mark, .menu ul a) { letter-spacing: -.035em; }
-/* Bricolage has no italic: emphasis is carried by colour alone */
-:root[data-fonts="bricolage-sourceserif"] :is(h1, h2, .big-mark, .interlude-quote, .ticker li, .menu) em,
-:root[data-fonts="bricolage-sourceserif"] .ticker li { font-style: normal; }
+/* tight tracking for the grotesque display; it has no italic, so emphasis is carried by colour */
+:is(.display, .hero h1, .interlude-quote, .big-mark, .menu ul a) { letter-spacing: -.035em; }
+:is(.big-mark, .interlude-quote, .menu) em { font-style: normal; }
 :is(.display, .hero h1, .wordmark, .menu ul a, .ticker li, .months .what, .areas h3, .interlude-quote, .facts h3, .price b, .post h3, .big-mark) { font-size-adjust: var(--fsa); }
 html { scroll-padding-top: var(--nav-h); }
 body {
@@ -128,7 +103,7 @@ a { color: inherit; }
   line-height: .95; letter-spacing: -.02em;
   text-wrap: balance;
 }
-.display em { font-style: italic; color: var(--petal-deep); }
+.display em { font-style: normal; color: var(--petal-deep); }
 .shade .display em { color: var(--petal); }
 .lead { margin: 0; font-size: clamp(17px, 1.35vw, 20px); line-height: 1.55; color: var(--ink-2); max-width: 46ch; text-wrap: pretty; }
 .shade .lead { color: var(--cream-2); }
@@ -249,7 +224,7 @@ a { color: inherit; }
   font-size: clamp(52px, min(8.6vw, 15vh), 136px);
   line-height: .9; letter-spacing: -.025em; text-wrap: balance;
 }
-.hero h1 em { font-style: italic; color: var(--petal); }
+.hero h1 em { font-style: normal; color: var(--petal); }
 .hero-bottom {
   display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px;
   padding-block: 0 clamp(22px, 3vw, 36px);
@@ -271,7 +246,7 @@ a { color: inherit; }
 .ticker-track { display: flex; width: max-content; animation: tick 70s linear infinite; }
 .ticker:hover .ticker-track { animation-play-state: paused; }
 .ticker ul { display: flex; list-style: none; margin: 0; padding: 18px 0; }
-.ticker li { display: flex; align-items: center; gap: 20px; padding-right: 20px; white-space: nowrap; font-family: var(--f-display); font-size: 22px; font-style: italic; color: var(--cream); }
+.ticker li { display: flex; align-items: center; gap: 20px; padding-right: 20px; white-space: nowrap; font-family: var(--f-display); font-size: 22px; color: var(--cream); }
 .ticker li::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--moss); }
 .ticker .data { color: var(--moss); font-style: normal; font-size: 12px; }
 @keyframes tick { to { transform: translateX(-50%); } }
@@ -320,7 +295,7 @@ a { color: inherit; }
 .months .what { font-family: var(--f-display); font-size: clamp(22px, 2vw, 28px); line-height: 1.15; color: var(--ink); transition: transform 260ms var(--ease-out); }
 .months .where { font-size: 14px; color: var(--ink-2); }
 .months button[aria-pressed="true"] { background: var(--lichen-2); }
-.months button[aria-pressed="true"] .what { color: var(--petal-deep); font-style: italic; }
+.months button[aria-pressed="true"] .what { color: var(--petal-deep); }
 @media (hover: hover) and (pointer: fine) { .months button:hover .what { transform: translateX(6px); } }
 .month-ph { margin-top: 12px; }
 
@@ -455,47 +430,6 @@ a { color: inherit; }
   .months .where { grid-column: 2; }
   .interlude { height: 150vh; }
 }
-
-.fontpick {
-  position: fixed; z-index: 45;
-  right: max(16px, env(safe-area-inset-right, 0px));
-  bottom: max(16px, env(safe-area-inset-bottom, 0px));
-  display: grid; justify-items: end; gap: 10px;
-  font-family: var(--f-body); color: var(--cream);
-}
-.fontpick-btn {
-  display: inline-flex; align-items: center; gap: 10px; max-width: min(320px, calc(100vw - 32px));
-  background: var(--bark); color: var(--cream); border: 1px solid var(--cream-rule); border-radius: 999px;
-  padding: 10px 16px 10px 12px; font: 500 13.5px/1.2 var(--f-body); cursor: pointer;
-  box-shadow: 0 10px 30px -8px rgba(0,0,0,.45);
-  transition: border-color 200ms ease, transform 160ms var(--ease-out);
-}
-.fontpick-btn:active { transform: scale(.97); }
-.fontpick-btn > span:first-child { font-family: var(--f-display); font-size: 20px; line-height: 1; color: var(--moss); }
-#fontBtnLabel { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (hover: hover) and (pointer: fine) { .fontpick-btn:hover { border-color: rgba(243,240,230,.5); } }
-.fontpick-panel {
-  width: min(320px, calc(100vw - 32px)); background: var(--bark); border: 1px solid var(--cream-rule); border-radius: 14px;
-  padding: 14px; box-shadow: 0 24px 60px -16px rgba(0,0,0,.55);
-  transform-origin: 100% 100%;
-  transition: opacity 180ms var(--ease-out), transform 220ms var(--ease-out);
-}
-@starting-style { .fontpick-panel { opacity: 0; transform: scale(.92) translateY(6px); } }
-.fontpick-title { margin: 2px 6px 10px; display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 13.5px; }
-.fontpick-title .data { font-size: 11px; color: var(--moss); }
-.fontpick ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.fontpick li button {
-  width: 100%; display: grid; gap: 2px; text-align: left; background: none; border: 0; border-radius: 9px;
-  padding: 10px 12px; color: var(--cream); cursor: pointer; transition: background-color 160ms ease;
-}
-.fontpick li b { font-family: var(--pf), Georgia, serif; font-weight: 400; font-size: 21px; line-height: 1.1; }
-.fontpick li span { font-family: var(--pb), system-ui, sans-serif; font-size: 13px; color: var(--cream-2); }
-.fontpick li button[aria-pressed="true"] { background: var(--bark-2); box-shadow: inset 0 0 0 1px rgba(205, 212, 127, .5); }
-@media (hover: hover) and (pointer: fine) { .fontpick li button:hover { background: var(--bark-2); } }
-.fontpick-keys { margin: 10px 6px 2px; font-size: 12px; color: var(--cream-2); }
-.fontpick kbd { font-family: var(--f-mono); font-size: 11px; border: 1px solid var(--cream-rule); border-radius: 4px; padding: 1px 5px; }
-@media (min-width: 561px) { .hero-side { margin-bottom: 56px; } } /* clear of the font preview button */
-@media (max-width: 560px) { #fontBtnLabel { display: none; } .fontpick-btn { padding: 10px 12px; } .fontpick-keys { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   .ticker-track { animation: none; flex-wrap: wrap; width: auto; }
@@ -812,23 +746,6 @@ a { color: inherit; }
     </div>
   </div>
 </footer>
-
-<!-- font preview: a review tool, remove once a pairing is chosen -->
-<div class="fontpick" id="fontpick">
-  <div class="fontpick-panel" id="fontPanel" role="group" aria-label="Font pairing" hidden>
-    <p class="fontpick-title">Font pairing <span class="data">PREVIEW</span></p>
-    <ul>
-      <li><button type="button" data-f="" style="--pf:'Cormorant';--pb:'Hanken Grotesk'"><b>Cormorant</b><span>Hanken Grotesk · current</span></button></li>
-      <li><button type="button" data-f="fraunces-inter" style="--pf:'Fraunces';--pb:'Inter'"><b>Fraunces</b><span>Inter</span></button></li>
-      <li><button type="button" data-f="garamond-work" style="--pf:'Cormorant Garamond';--pb:'Work Sans'"><b>Cormorant Garamond</b><span>Work Sans</span></button></li>
-      <li><button type="button" data-f="dmserif-dmsans" style="--pf:'DM Serif Display';--pb:'DM Sans'"><b>DM Serif Display</b><span>DM Sans</span></button></li>
-      <li><button type="button" data-f="newsreader-instrument" style="--pf:'Newsreader';--pb:'Instrument Sans'"><b>Newsreader</b><span>Instrument Sans</span></button></li>
-      <li><button type="button" data-f="bricolage-sourceserif" style="--pf:'Bricolage Grotesque';--pb:'Source Serif 4'"><b>Bricolage Grotesque</b><span>Source Serif 4</span></button></li>
-    </ul>
-    <p class="fontpick-keys">Press <kbd>F</kbd> to step through them.</p>
-  </div>
-  <button class="fontpick-btn" id="fontBtn" type="button" aria-expanded="false" aria-controls="fontPanel"><span aria-hidden="true">Aa</span><span id="fontBtnLabel">Cormorant + Hanken Grotesk</span></button>
-</div>
 
 <script src="assets/hero.js"></script>
 <script src="assets/site.js"></script>
