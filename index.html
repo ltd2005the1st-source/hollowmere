@@ -4,414 +4,744 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hollowmere Garden</title>
-<meta name="description" content="A garden you can visit every day of the year.">
+<meta name="description" content="A woodland garden you can visit every day of the year.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;1,300;1,400&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>
+  (function () {
+    var r = document.documentElement;
+    r.classList.add("js");
+    try { var t = localStorage.getItem("hm-theme"); if (t === "dark" || t === "light") r.setAttribute("data-theme", t); } catch (e) {}
+    // if the motion script never runs, show the headings anyway
+    setTimeout(function () { r.classList.add("ready"); }, 2500);
+  })();
+</script>
 <style>
-/* Layout: the bare branch runs across the middle of the screen; the headline sits in the open sky
-   above it, the visit actions in the shade below it, so the branch itself stays clear for the cursor. */
+/* Layout: a dark woodland hero where moss grows under the cursor, then the page steps into daylight:
+   pale lichen grounds for reading, with bark-dark bands for the moments that should feel like shade.
+   Mono is only used for data people check: months, times, prices, walking minutes. */
 :root {
-  color-scheme: dark;
-  --bark: #16170f;          /* ground behind the picture, deep bark */
-  --ink: #f3f0e6;           /* text on the picture */
-  --ink-soft: rgba(243, 240, 230, .78);
-  --ink-faint: rgba(243, 240, 230, .5);
-  --moss: #cdd47f;          /* sunlit moss, used sparingly */
-  --petal: #f1c7d0;         /* petal pink, the italic word + focus */
-  --scrim: 20, 22, 13;      /* rgb of the shade laid over the picture */
+  --bark: #16170f;            /* shade: hero, membership, footer */
+  --bark-2: #212318;          /* raised surface inside shade */
+  --lichen: #e5e9da;          /* daylight ground */
+  --lichen-2: #d9dfca;        /* alternate daylight band */
+  --ink: #1c2015;             /* text on daylight */
+  --ink-2: #4a5140;           /* secondary text on daylight */
+  --rule: rgba(28, 32, 21, .16);
+  --cream: #f3f0e6;           /* text in shade */
+  --cream-2: rgba(243, 240, 230, .74);
+  --cream-rule: rgba(243, 240, 230, .18);
+  --moss: #cdd47f;            /* sunlit moss, used in shade */
+  --moss-deep: #56621a;       /* moss on daylight */
+  --petal: #f1c7d0;           /* petal in shade */
+  --petal-deep: #a9455f;      /* petal on daylight */
+  --scrim: 20, 22, 13;
 
   --f-display: "Cormorant", "Cormorant Garamond", Garamond, "Times New Roman", serif;
   --f-body: "Hanken Grotesk", "Helvetica Neue", Arial, system-ui, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-move: cubic-bezier(0.25, 1, 0.5, 1);
   --pad: clamp(0px, 3.4vw, 44px);
+  --section: clamp(88px, 12vw, 168px);
+  --nav-h: 72px;
 }
-html, body { height: 100%; }
+/* night: the daylight grounds turn to a dark wood; shade bands go deeper still */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bark: #080906; --bark-2: #1c1f15;
+    --lichen: #11130c; --lichen-2: #181b11;
+    --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14);
+    --moss-deep: #c4cd70; --petal-deep: #eeb4c2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+    --bark: #080906; --bark-2: #1c1f15;
+    --lichen: #11130c; --lichen-2: #181b11;
+    --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14);
+    --moss-deep: #c4cd70; --petal-deep: #eeb4c2;
+    color-scheme: dark;
+}
+html { scroll-padding-top: var(--nav-h); }
 body {
-  background: var(--bark);
+  margin: 0;
+  background: var(--lichen);
   color: var(--ink);
   font-family: var(--f-body);
   font-size: 16px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--moss); color: var(--bark); }
+img { max-width: 100%; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--petal-deep); outline-offset: 3px; border-radius: 2px; }
+.shade :focus-visible, .hero :focus-visible, .site-nav :focus-visible, .menu :focus-visible { outline-color: var(--petal); }
+.wrap {
+  padding-left: calc(max(16px, env(safe-area-inset-left, 0px)) + var(--pad));
+  padding-right: calc(max(16px, env(safe-area-inset-right, 0px)) + var(--pad));
+}
+.inner { max-width: 1320px; margin-inline: auto; }
+.skip { position: absolute; left: 16px; top: -60px; z-index: 100; background: var(--cream); color: var(--bark); padding: 10px 14px; border-radius: 6px; }
+.skip:focus { top: 12px; }
+
+/* ---------- type ---------- */
+.display {
+  margin: 0;
+  font-family: var(--f-display); font-weight: 300;
+  font-size: clamp(44px, 6.4vw, 96px);
+  line-height: .95; letter-spacing: -.02em;
+  text-wrap: balance;
+}
+.display em { font-style: italic; color: var(--petal-deep); }
+.shade .display em { color: var(--petal); }
+.lead { margin: 0; font-size: clamp(17px, 1.35vw, 20px); line-height: 1.55; color: var(--ink-2); max-width: 46ch; text-wrap: pretty; }
+.shade .lead { color: var(--cream-2); }
+.data { font-family: var(--f-mono); font-size: 13px; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font: 600 15px/1 var(--f-body); text-decoration: none; letter-spacing: .005em;
+  padding: 16px 22px; border-radius: 999px; border: 1px solid transparent; cursor: pointer;
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, transform 160ms var(--ease-out);
+}
+.btn:active { transform: scale(.97); }
+.btn svg { transition: transform 240ms var(--ease-out); }
+.btn-solid { background: var(--ink); color: var(--lichen); }
+.btn-line { border-color: rgba(28,32,21,.35); color: var(--ink); }
+.shade .btn-solid, .hero .btn-solid { background: var(--cream); color: var(--bark); }
+.shade .btn-line, .hero .btn-line { border-color: rgba(243,240,230,.42); color: var(--cream); }
+@media (hover: hover) and (pointer: fine) {
+  .btn-solid:hover { background: var(--moss-deep); color: var(--lichen); }
+  .shade .btn-solid:hover, .hero .btn-solid:hover { background: var(--moss); color: var(--bark); }
+  .btn-line:hover { border-color: currentColor; }
+  .btn:hover svg { transform: translateX(3px); }
 }
 
+/* ---------- site nav ---------- */
+.site-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 40;
+  padding-top: env(safe-area-inset-top, 0px);
+  color: var(--cream);
+  transition: transform 320ms var(--ease-move), background-color 300ms ease, color 300ms ease, border-color 300ms ease;
+  border-bottom: 1px solid transparent;
+}
+.site-nav .bar { display: flex; align-items: center; gap: 28px; height: var(--nav-h); }
+.site-nav.solid { background: var(--bark); border-bottom-color: var(--cream-rule); }
+.site-nav.away { transform: translateY(-100%); }
+.wordmark { font-family: var(--f-display); font-weight: 500; font-size: 27px; letter-spacing: .005em; text-decoration: none; margin-right: auto; line-height: 1; }
+.links { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; }
+.links a {
+  font-size: 14.5px; font-weight: 500; text-decoration: none; color: var(--cream-2);
+  padding-block: 6px; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
+  transition: color 200ms ease, background-size 260ms var(--ease-out);
+}
+.links a:hover, .links a[aria-current="true"] { color: var(--cream); background-size: 100% 1px; }
+.nav-cta { padding: 11px 18px; font-size: 14px; }
+.theme-btn {
+  display: inline-grid; place-items: center; width: 42px; height: 42px; border-radius: 50%;
+  background: none; border: 1px solid rgba(243,240,230,.3); color: var(--cream); cursor: pointer;
+  transition: border-color 200ms ease, transform 160ms var(--ease-out);
+}
+.theme-btn:active { transform: scale(.94); }
+.theme-btn svg { grid-area: 1 / 1; transition: opacity 200ms ease, transform 300ms var(--ease-out); }
+.theme-btn .i-sun { opacity: 0; transform: rotate(-60deg) scale(.7); }
+.theme-btn.is-dark .i-sun { opacity: 1; transform: none; }
+.theme-btn.is-dark .i-moon { opacity: 0; transform: rotate(60deg) scale(.7); }
+@media (hover: hover) and (pointer: fine) { .theme-btn:hover { border-color: var(--cream); } }
+.site-nav .nav-cta { background: var(--cream); color: var(--bark); }
+.menu-btn {
+  display: none; align-items: center; gap: 10px; background: none; border: 1px solid rgba(243,240,230,.4);
+  color: var(--cream); font: 600 14px/1 var(--f-body); padding: 11px 16px; border-radius: 999px; cursor: pointer;
+}
+.menu-btn:active { transform: scale(.97); }
+.menu-btn i { display: grid; gap: 4px; }
+.menu-btn i b { display: block; width: 16px; height: 1.5px; background: currentColor; }
+
+/* full-screen menu, opening out of the Menu button */
+.menu {
+  position: fixed; inset: 0; z-index: 50; background: var(--bark); color: var(--cream);
+  display: grid; grid-template-rows: auto 1fr auto;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  clip-path: circle(0px at var(--mx, 90%) var(--my, 36px));
+  visibility: hidden;
+  transition: clip-path 520ms var(--ease-move), visibility 0s linear 520ms;
+}
+.menu.open { clip-path: circle(150vmax at var(--mx, 90%) var(--my, 36px)); visibility: visible; transition: clip-path 620ms var(--ease-move), visibility 0s; }
+.menu .bar { display: flex; align-items: center; justify-content: space-between; height: var(--nav-h); }
+.menu nav { align-self: center; }
+.menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.menu ul a {
+  display: block; text-decoration: none; font-family: var(--f-display); font-weight: 300;
+  font-size: clamp(44px, 12vw, 72px); line-height: 1.05; padding-block: 4px;
+}
+.menu ul a span { display: inline-block; transform: translateY(-40%); opacity: 0; transition: transform 600ms var(--ease-out), opacity 400ms ease; }
+.menu.open ul a span { transform: none; opacity: 1; }
+.menu.open li:nth-child(2) a span { transition-delay: 50ms; }
+.menu.open li:nth-child(3) a span { transition-delay: 100ms; }
+.menu.open li:nth-child(4) a span { transition-delay: 150ms; }
+.menu.open li:nth-child(5) a span { transition-delay: 200ms; }
+.menu.open li:nth-child(6) a span { transition-delay: 250ms; }
+.menu .foot { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center; color: var(--cream-2); }
+
+@media (max-width: 960px) {
+  .links, .nav-cta { display: none; }
+  .menu-btn { display: inline-flex; }
+}
+
+/* ---------- hero ---------- */
 .hero {
-  position: relative;
-  isolation: isolate;
+  position: relative; isolation: isolate;
   min-height: max(620px, 100svh);
-  display: grid;
-  grid-template-rows: auto auto 1fr auto;
-  overflow: hidden;
-  touch-action: pan-y;
+  display: grid; grid-template-rows: var(--nav-h) auto 1fr auto;
+  overflow: hidden; touch-action: pan-y;
+  background: var(--bark); color: var(--cream);
 }
-
-/* ---------- picture ---------- */
-.bare, .garden {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%; max-width: 100%;
-  z-index: -3;
-}
+.bare, .garden { position: absolute; inset: 0; width: 100%; height: 100%; max-width: 100%; z-index: -3; }
 .bare { object-fit: cover; object-position: var(--pan-x, 50%) 45%; }
 .garden { opacity: 0; transition: opacity .6s ease; }
 .garden.ready { opacity: 1; }
-.shade {
+.hero .scrim {
   position: absolute; inset: 0; z-index: -2; pointer-events: none;
   background:
     linear-gradient(180deg, rgba(var(--scrim), .62) 0%, rgba(var(--scrim), .28) 32%, rgba(var(--scrim), 0) 46%),
     linear-gradient(0deg, rgba(var(--scrim), .82) 0%, rgba(var(--scrim), .3) 20%, rgba(var(--scrim), 0) 30%);
 }
-
-.wrap {
-  padding-left: calc(max(16px, env(safe-area-inset-left, 0px)) + var(--pad));
-  padding-right: calc(max(16px, env(safe-area-inset-right, 0px)) + var(--pad));
+.hero-top { padding-block: clamp(12px, 3vh, 40px) 0; text-shadow: 0 1px 24px rgba(var(--scrim), .5); }
+.hero h1 {
+  margin: 0; font-family: var(--f-display); font-weight: 300;
+  font-size: clamp(52px, min(8.6vw, 15vh), 136px);
+  line-height: .9; letter-spacing: -.025em; text-wrap: balance;
 }
-
-/* ---------- nav ---------- */
-.nav { display: flex; align-items: center; gap: 24px; padding-block: clamp(16px, 2.6vw, 28px); }
-.mark { display: flex; align-items: baseline; gap: 10px; color: var(--ink); text-decoration: none; margin-right: auto; }
-.mark b { font-family: var(--f-display); font-weight: 400; font-size: 26px; letter-spacing: .01em; }
-.mark small { font-family: var(--f-mono); font-size: 11px; color: var(--ink-faint); letter-spacing: .06em; }
-.nav ul { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; }
-.nav ul a { color: var(--ink-soft); text-decoration: none; font-size: 14px; font-weight: 500; transition: color .2s; }
-.nav ul a:hover { color: var(--ink); }
-.pill {
-  font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none;
-  padding: 9px 16px; border: 1px solid rgba(243,240,230,.38); border-radius: 999px;
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  transition: background .2s, border-color .2s;
-}
-.pill:hover { background: rgba(243,240,230,.1); border-color: var(--ink); }
-
-/* ---------- headline, above the branch ---------- */
-.top { display: grid; gap: 16px; padding-block: clamp(8px, 2vh, 28px) 0; text-shadow: 0 1px 24px rgba(var(--scrim), .5); }
-.eyebrow {
-  margin: 0; font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em; color: var(--moss);
-  display: flex; flex-wrap: wrap; gap: 6px 14px;
-}
-.eyebrow span + span::before { content: "·"; margin-right: 14px; color: var(--ink-faint); }
-h1 {
-  margin: 0;
-  font-family: var(--f-display); font-weight: 300;
-  font-size: clamp(50px, min(8.6vw, 15vh), 136px);
-  line-height: .88; letter-spacing: -.025em;
-  text-wrap: balance;
-}
-h1 em { font-style: italic; color: var(--petal); }
-
-/* ---------- actions, below the branch ---------- */
-.bottom {
-  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px;
-  padding-block: 0 clamp(20px, 3vw, 36px);
+.hero h1 em { font-style: italic; color: var(--petal); }
+.hero-bottom {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px;
+  padding-block: 0 clamp(22px, 3vw, 36px);
   text-shadow: 0 1px 16px rgba(var(--scrim), .6);
 }
-.act { display: grid; gap: 16px; min-width: 0; }
-.lede { margin: 0; max-width: 52ch; font-size: clamp(15px, 1.2vw, 17.5px); line-height: 1.5; color: var(--ink-soft); }
+.hero-act { display: grid; gap: 18px; min-width: 0; }
+.hero .lead { color: var(--cream-2); max-width: 50ch; }
 .ctas { display: flex; flex-wrap: wrap; gap: 10px; }
-.btn {
-  display: inline-flex; align-items: center; gap: 10px;
-  font: 600 15px/1 var(--f-body); text-decoration: none; text-shadow: none;
-  padding: 15px 22px; border-radius: 999px;
-  transition: transform .25s ease, background .2s, color .2s, border-color .2s;
-}
-.btn-primary { background: var(--ink); color: var(--bark); }
-.btn-primary:hover { background: var(--moss); transform: translateY(-1px); }
-.btn-primary svg { transition: transform .25s ease; }
-.btn-primary:hover svg { transform: translateX(3px); }
-.btn-ghost { color: var(--ink); border: 1px solid rgba(243,240,230,.42); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
-.btn-ghost:hover { border-color: var(--ink); background: rgba(243,240,230,.08); }
-.hint {
-  margin: 0; display: inline-flex; align-items: center; gap: 10px;
-  font-family: var(--f-mono); font-size: 12px; letter-spacing: .04em; color: var(--ink-soft);
-  transition: opacity .8s;
-}
+.hero .btn { text-shadow: none; }
+.hero-side { display: grid; gap: 10px; justify-items: end; text-align: right; }
+.today { color: var(--cream); }
+.today b { font-weight: 500; color: var(--moss); }
+.hint { margin: 0; display: inline-flex; align-items: center; gap: 10px; color: var(--cream-2); transition: opacity .8s; }
 .hint.gone { opacity: 0; }
 .hint i { width: 26px; height: 1px; background: currentColor; display: block; }
-a:focus-visible { outline: 2px solid var(--petal); outline-offset: 3px; }
 
-@media (max-width: 860px) {
-  .nav ul, .mark small { display: none; }
+/* ---------- ticker: what is in flower this week ---------- */
+.ticker { background: var(--bark); color: var(--cream-2); border-top: 1px solid var(--cream-rule); overflow: hidden; }
+.ticker-track { display: flex; width: max-content; animation: tick 70s linear infinite; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker ul { display: flex; list-style: none; margin: 0; padding: 18px 0; }
+.ticker li { display: flex; align-items: center; gap: 20px; padding-right: 20px; white-space: nowrap; font-family: var(--f-display); font-size: 22px; font-style: italic; color: var(--cream); }
+.ticker li::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--moss); }
+.ticker .data { color: var(--moss); font-style: normal; font-size: 12px; }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+/* ---------- image placeholders ---------- */
+.ph {
+  position: relative; overflow: hidden; margin: 0;
+  background: var(--bark-2); color: var(--cream);
+  border-radius: 4px; max-width: 100%;
 }
-@media (max-width: 520px) {
-  .pill { padding: 8px 13px; font-size: 13px; }
-  .eyebrow { font-size: 11px; }
-  .lede { font-size: 14.5px; }
-  .btn { padding: 13px 17px; font-size: 14px; }
+.ph-img {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(60% 50% at var(--x1, 30%) var(--y1, 40%), rgba(205, 212, 127, .30), transparent 70%),
+    radial-gradient(50% 60% at var(--x2, 75%) var(--y2, 65%), rgba(241, 199, 208, .16), transparent 70%),
+    radial-gradient(80% 70% at 50% 110%, rgba(86, 98, 26, .55), transparent 70%),
+    linear-gradient(160deg, #2b2f1f, #191b12);
+  transform-origin: 50% 50%;
+}
+.ph-img::after {
+  content: ""; position: absolute; inset: 0; opacity: .5;
+  background-image: repeating-linear-gradient(135deg, rgba(243,240,230,.05) 0 1px, transparent 1px 14px);
+}
+.ph figcaption {
+  position: absolute; left: 14px; right: 14px; bottom: 12px;
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; line-height: 1.4; color: var(--cream);
+}
+.ph figcaption svg { flex: none; margin-top: 1px; color: var(--moss); }
+.ph figcaption > span { min-width: 0; overflow-wrap: anywhere; }
+.ph figcaption small { display: block; font-family: var(--f-mono); font-size: 11px; color: var(--cream-2); letter-spacing: .03em; margin-top: 2px; }
+.r-3x2 { aspect-ratio: 3 / 2; } .r-4x5 { aspect-ratio: 4 / 5; } .r-1x1 { aspect-ratio: 1; } .r-16x9 { aspect-ratio: 16 / 9; } .r-5x4 { aspect-ratio: 5 / 4; }
+
+/* ---------- 1. seasons ---------- */
+.seasons { padding-block: var(--section); }
+.seasons .inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
+.seasons-head { display: grid; gap: 28px; position: sticky; top: calc(var(--nav-h) + 32px); }
+.months { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.months button {
+  width: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: baseline; gap: 16px;
+  padding: 16px 4px; background: none; border: 0; border-bottom: 1px solid var(--rule);
+  font: inherit; color: var(--ink-2); text-align: left; cursor: pointer;
+  transition: color 200ms ease, background-color 200ms ease;
+}
+.months .data { color: var(--moss-deep); font-weight: 500; }
+.months .what { font-family: var(--f-display); font-size: clamp(22px, 2vw, 28px); line-height: 1.15; color: var(--ink); transition: transform 260ms var(--ease-out); }
+.months .where { font-size: 14px; color: var(--ink-2); }
+.months button[aria-pressed="true"] { background: var(--lichen-2); }
+.months button[aria-pressed="true"] .what { color: var(--petal-deep); font-style: italic; }
+@media (hover: hover) and (pointer: fine) { .months button:hover .what { transform: translateX(6px); } }
+.month-ph { margin-top: 12px; }
+
+/* ---------- 2. grounds ---------- */
+.grounds { background: var(--lichen-2); padding-block: var(--section); }
+.grounds .inner { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
+.grounds-map { position: sticky; top: calc(var(--nav-h) + 32px); }
+.grounds-copy { display: grid; gap: 28px; }
+.areas { list-style: none; margin: 12px 0 0; padding: 0; counter-reset: none; }
+.areas li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 20px; padding: 22px 0; }
+.areas li::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--rule); transform-origin: 0 50%; }
+.areas h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.1; }
+.areas p { margin: 0; grid-column: 1 / -1; color: var(--ink-2); max-width: 44ch; }
+.areas .data { color: var(--moss-deep); align-self: center; white-space: nowrap; }
+
+/* ---------- 3. interlude ---------- */
+.interlude { background: var(--lichen-2); height: 190vh; position: relative; }
+.interlude-stick { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; overflow: hidden; }
+.interlude .ph { position: absolute; inset: 0; border-radius: 0; transform-origin: 50% 50%; }
+.interlude .ph figcaption { left: auto; right: max(16px, env(safe-area-inset-right, 0px)); bottom: 20px; max-width: 280px; }
+.interlude-quote {
+  position: relative; z-index: 1; margin: 0; text-align: center; color: var(--cream);
+  font-family: var(--f-display); font-weight: 300; font-size: clamp(38px, 5.6vw, 84px); line-height: 1.02; letter-spacing: -.02em;
+  max-width: 16ch; text-wrap: balance; text-shadow: 0 2px 30px rgba(var(--scrim), .5);
+}
+.interlude-quote em { color: var(--petal); }
+.interlude-quote .data { display: block; margin-top: 24px; font-size: 13px; letter-spacing: .04em; color: var(--moss); text-shadow: none; }
+
+/* ---------- 4. visit ---------- */
+.visit { padding-block: var(--section); }
+.visit-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 64px; align-items: end; margin-bottom: clamp(48px, 6vw, 88px); }
+.visit-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 4fr); gap: clamp(32px, 4vw, 64px); align-items: start; }
+.facts h3 { margin: 0 0 14px; font-family: var(--f-display); font-weight: 400; font-size: 28px; }
+.facts dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.facts dt, .facts dd { padding: 12px 0; border-top: 1px solid var(--rule); margin: 0; }
+.facts dd { text-align: right; font-family: var(--f-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+.facts p { margin: 0 0 12px; color: var(--ink-2); }
+.facts + .facts { }
+.visit-note { margin-top: 20px; font-size: 14px; color: var(--ink-2); }
+
+/* ---------- 5. membership ---------- */
+.shade { background: var(--bark); color: var(--cream); }
+.membership { padding-block: var(--section); color-scheme: dark; overflow: hidden; }
+.membership .inner { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: center; }
+.member-copy { display: grid; gap: 30px; }
+.price { display: flex; align-items: baseline; gap: 12px; }
+.price b { font-family: var(--f-display); font-weight: 300; font-size: clamp(64px, 7vw, 104px); line-height: 1; letter-spacing: -.02em; color: var(--moss); }
+.price span { color: var(--cream-2); }
+.perks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--cream-rule); }
+.perks li { display: flex; gap: 14px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--cream-rule); }
+.perks svg { flex: none; color: var(--moss); transform: translateY(2px); }
+.member-ph-wrap { position: relative; }
+.member-ph-wrap .small { position: absolute; width: 46%; left: -14%; bottom: -10%; box-shadow: 0 24px 48px rgba(0,0,0,.35); }
+
+/* ---------- 6. journal ---------- */
+.journal { padding-block: var(--section); }
+.journal-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: clamp(40px, 5vw, 72px); }
+.journal-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(32px, 4vw, 64px); }
+.post { display: grid; gap: 16px; text-decoration: none; color: inherit; }
+.post h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 36px); line-height: 1.1; text-wrap: balance; transition: color 200ms ease; }
+.post.big h3 { font-size: clamp(32px, 3.4vw, 52px); }
+.post p { margin: 0; color: var(--ink-2); max-width: 52ch; }
+.post .data { color: var(--moss-deep); }
+.post .ph { transition: transform 400ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .post:hover h3 { color: var(--petal-deep); }
+}
+.side-posts { display: grid; gap: 40px; align-content: start; }
+.side-posts .post { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: start; gap: 20px; }
+.side-posts .post > div { display: grid; gap: 10px; }
+
+/* ---------- footer ---------- */
+.foot-wrap { padding-block: clamp(72px, 9vw, 128px) max(28px, env(safe-area-inset-bottom, 0px)); color-scheme: dark; }
+.foot-top { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: end; padding-bottom: 56px; border-bottom: 1px solid var(--cream-rule); }
+.big-mark { margin: 0; font-family: var(--f-display); font-weight: 300; font-size: clamp(64px, 12vw, 184px); line-height: .82; letter-spacing: -.03em; }
+.big-mark em { color: var(--moss); }
+.signup { display: grid; gap: 14px; }
+.signup label { color: var(--cream-2); }
+.signup .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.signup input {
+  flex: 1 1 220px; min-width: 0; font: 16px var(--f-body); color: var(--cream);
+  background: var(--bark-2); border: 1px solid var(--cream-rule); border-radius: 999px; padding: 15px 20px;
+  transition: border-color 200ms ease;
+}
+.signup input::placeholder { color: rgba(243,240,230,.5); }
+.signup input:focus { outline: none; border-color: var(--moss); }
+.signup output { min-height: 1.5em; color: var(--moss); font-size: 14px; }
+.foot-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; padding-top: 40px; color: var(--cream-2); font-size: 15px; }
+.foot-cols h4 { margin: 0 0 12px; color: var(--cream); font-weight: 600; font-size: 14px; }
+.foot-cols ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.foot-cols a { text-decoration: none; transition: color 200ms ease; }
+.foot-cols a:hover { color: var(--cream); }
+.legal { margin-top: 48px; color: rgba(243,240,230,.5); font-size: 13px; }
+
+/* ---------- motion: hidden states only exist once script has run ---------- */
+.js:not(.ready) [data-lines] { opacity: 0; }
+.ln { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
+.ln-i { display: inline-block; will-change: auto; }
+.js [data-lines]:not(.in) .ln-i { transform: translateY(-108%) rotate(-1.5deg); }
+.js [data-lines] .ln-i { transition: transform 1000ms var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms); transform-origin: 0 100%; }
+.js [data-reveal] { transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out), filter 900ms var(--ease-out); transition-delay: var(--d, 0ms); }
+.js [data-reveal]:not(.in) { opacity: 0; transform: translateY(18px); filter: blur(4px); }
+.js [data-stagger] > * { transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
+.js [data-stagger]:not(.in) > * { opacity: 0; transform: translateY(-14px); }
+.js .areas:not(.in) li::before { transform: scaleX(0); }
+.areas li::before { transition: transform 1100ms var(--ease-out); transition-delay: inherit; }
+.js [data-clip] { transition: clip-path 1200ms cubic-bezier(0.77, 0, 0.175, 1); }
+.js [data-clip]:not(.in) { clip-path: inset(100% 0 0 0); }
+
+@media (max-width: 960px) {
+  .seasons .inner, .grounds .inner, .membership .inner, .foot-top, .visit-head, .journal-grid { grid-template-columns: minmax(0, 1fr); }
+  .seasons-head, .grounds-map { position: static; }
+  .visit-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .visit-grid .ph { grid-column: 1 / -1; }
+  .foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .member-ph-wrap { margin-inline: 8% 0; }
+}
+@media (max-width: 560px) {
+  :root { --nav-h: 64px; }
+  .wordmark { font-size: 24px; }
+  .hero-side { justify-items: start; text-align: left; }
   .hint { display: none; }
-  .shade {
+  .btn { padding: 14px 18px; font-size: 14.5px; }
+  .hero .scrim {
     background:
       linear-gradient(180deg, rgba(var(--scrim), .7) 0%, rgba(var(--scrim), .35) 34%, rgba(var(--scrim), 0) 44%),
-      linear-gradient(0deg, rgba(var(--scrim), .9) 0%, rgba(var(--scrim), .45) 22%, rgba(var(--scrim), 0) 32%);
+      linear-gradient(0deg, rgba(var(--scrim), .9) 0%, rgba(var(--scrim), .5) 26%, rgba(var(--scrim), 0) 36%);
   }
+  .visit-grid { grid-template-columns: minmax(0, 1fr); }
+  .side-posts .post { grid-template-columns: minmax(0, 1fr); }
+  .months button { grid-template-columns: 48px minmax(0, 1fr); }
+  .months .where { grid-column: 2; }
+  .interlude { height: 150vh; }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .garden, .hint, .btn, .btn svg { transition: none; }
+  .ticker-track { animation: none; flex-wrap: wrap; width: auto; }
+  .ticker-track ul + ul { display: none; }
+  .ticker ul { flex-wrap: wrap; padding-inline: 16px; }
+  .js [data-lines] .ln-i, .js [data-lines]:not(.in) .ln-i { transform: none; transition: none; }
+  .js [data-reveal], .js [data-reveal]:not(.in) { transform: none; filter: none; transition: opacity 400ms ease; }
+  .js [data-stagger] > *, .js [data-stagger]:not(.in) > * { transform: none; transition: opacity 400ms ease; }
+  .js [data-clip], .js [data-clip]:not(.in) { clip-path: none; transition: none; }
+  .js .areas:not(.in) li::before { transform: none; }
+  .menu, .menu.open { transition: visibility 0s, opacity 200ms ease; clip-path: none; }
+  .menu:not(.open) { opacity: 0; }
+  .menu ul a span { transform: none; transition: opacity 200ms ease; }
+  .interlude { height: auto; }
+  .interlude-stick { position: relative; height: 80vh; }
+  .site-nav, .btn, .garden, .hint { transition: none; }
 }
 </style>
-<style>body { margin: 0; }</style>
 </head>
 <body>
-<section class="hero" id="hero" aria-label="Hollowmere Garden">
-  <img class="bare" id="bareImg" src="assets/bare.jpg" alt="A bare tree branch against a soft, blurred woodland">
-  <canvas class="garden" id="garden" aria-hidden="true"></canvas>
-  <div class="shade"></div>
+<a class="skip" href="#main">Skip to content</a>
 
-  <header class="nav wrap">
-    <a class="mark" href="#hero"><b>Hollowmere</b><small>GARDEN · EST. 1911</small></a>
+<!-- ======== navigation ======== -->
+<header class="site-nav" id="siteNav">
+  <div class="bar wrap">
+    <a class="wordmark" href="#top">Hollowmere</a>
     <nav aria-label="Main">
-      <ul>
-        <li><a href="#hero">Seasons</a></li>
-        <li><a href="#hero">The grounds</a></li>
-        <li><a href="#hero">Membership</a></li>
+      <ul class="links">
+        <li><a href="#seasons">Seasons</a></li>
+        <li><a href="#grounds">The grounds</a></li>
+        <li><a href="#visit">Visit</a></li>
+        <li><a href="#membership">Membership</a></li>
+        <li><a href="#journal">Journal</a></li>
       </ul>
     </nav>
-    <a class="pill" href="#hero">Tickets</a>
-  </header>
-
-  <div class="top wrap">
-    <p class="eyebrow"><span>OPEN 365 DAYS</span><span>09:00–18:00</span><span>40 ACRES</span></p>
-    <h1>Something is <em>always</em> in bloom.</h1>
+    <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark mode">
+      <svg class="i-moon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M14.5 11.2A6.2 6.2 0 0 1 6.8 3.5a6.2 6.2 0 1 0 7.7 7.7Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      <svg class="i-sun" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    </button>
+    <a class="btn btn-solid nav-cta" href="#visit">Book tickets</a>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menu"><i aria-hidden="true"><b></b><b></b></i>Menu</button>
   </div>
+</header>
 
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu">
+  <div class="bar wrap">
+    <span class="wordmark">Hollowmere</span>
+    <button class="menu-btn" id="menuClose" type="button" style="display:inline-flex">Close</button>
+  </div>
+  <nav class="wrap" aria-label="Menu">
+    <ul>
+      <li><a href="#seasons"><span>Seasons</span></a></li>
+      <li><a href="#grounds"><span>The grounds</span></a></li>
+      <li><a href="#visit"><span>Visit</span></a></li>
+      <li><a href="#membership"><span>Membership</span></a></li>
+      <li><a href="#journal"><span>Journal</span></a></li>
+      <li><a href="#visit"><span><em>Book tickets</em></span></a></li>
+    </ul>
+  </nav>
+  <div class="foot wrap">
+    <span class="data">OPEN EVERY DAY · 09:00–16:30 IN WINTER</span>
+    <span>Hollowmere Lane, Ashcombe</span>
+  </div>
+</div>
+
+<!-- ======== hero ======== -->
+<section class="hero" id="top" aria-label="Hollowmere Garden">
+  <img class="bare" id="bareImg" src="assets/bare.jpg" alt="A bare tree branch against a soft, blurred woodland">
+  <canvas class="garden" id="garden" aria-hidden="true"></canvas>
+  <div class="scrim"></div>
+  <div aria-hidden="true"></div>
+  <div class="hero-top wrap" id="heroTop">
+    <h1 data-lines>Something is <em>always</em> in bloom.</h1>
+  </div>
   <div></div>
-
-  <div class="bottom wrap">
-    <div class="act">
-      <p class="lede">Bare wood in winter, moss and wildflowers by spring. Walk forty acres of woodland and meadow that change with every month of the year.</p>
+  <div class="hero-bottom wrap" id="heroBottom">
+    <div class="hero-act" data-reveal style="--d:500ms">
+      <p class="lead">Bare wood in winter, moss and wildflowers by spring. Walk forty acres of woodland and meadow that change with every month of the year.</p>
       <div class="ctas">
-        <a class="btn btn-primary" href="#hero">Plan your visit
+        <a class="btn btn-solid" href="#visit">Plan your visit
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-        <a class="btn btn-ghost" href="#hero">What's blooming now</a>
+        <a class="btn btn-line" href="#seasons">See what's in flower</a>
       </div>
     </div>
-    <p class="hint" id="hint"><i></i><span id="hintText">Move along the branch</span></p>
+    <div class="hero-side" data-reveal style="--d:700ms">
+      <p class="hint data" id="hint"><i></i><span id="hintText">Move along the branch</span></p>
+      <p class="today data" style="margin:0"><b>Open today</b> 09:00–16:30</p>
+    </div>
   </div>
 </section>
 
-<script>
-(() => {
-  const hero = document.getElementById("hero");
-  const canvas = document.getElementById("garden");
-  const bareImg = document.getElementById("bareImg");
-  const hint = document.getElementById("hint");
-  const hintText = document.getElementById("hintText");
+<main id="main">
 
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const coarse = matchMedia("(hover: none), (pointer: coarse)").matches;
-  if (coarse) hintText.textContent = "Touch the branch";
+<!-- ticker -->
+<div class="ticker" aria-label="In flower this week">
+  <div class="ticker-track">
+    <ul>
+      <li><span class="data">THIS WEEK</span></li>
+      <li>Witch hazel by the east gate</li><li>Hellebores in the Walled Garden</li><li>Holly berries along Long Meadow</li>
+      <li>Hair-cap moss on the north wall</li><li>Winter box by the glasshouse door</li><li>Cyclamen under the beeches</li>
+    </ul>
+    <ul aria-hidden="true">
+      <li><span class="data">THIS WEEK</span></li>
+      <li>Witch hazel by the east gate</li><li>Hellebores in the Walled Garden</li><li>Holly berries along Long Meadow</li>
+      <li>Hair-cap moss on the north wall</li><li>Winter box by the glasshouse door</li><li>Cyclamen under the beeches</li>
+    </ul>
+  </div>
+</div>
 
-  const IW = 2048, IH = 998;              // source picture size
-  const GW = 220, GH = 108;               // growth field, laid over the picture
-  const grow = new Float32Array(GW * GH);
-  const growBytes = new Uint8Array(GW * GH);
+<!-- ======== 1. seasons ======== -->
+<section class="seasons wrap" id="seasons" aria-labelledby="seasonsTitle">
+  <div class="inner">
+    <div class="seasons-head">
+      <h2 class="display" id="seasonsTitle" data-lines>Twelve months, <em>twelve gardens.</em></h2>
+      <p class="lead" data-reveal>Nothing here is planted for one big week. Pick a month to see what you would walk past.</p>
+      <figure class="ph r-4x5 month-ph" data-grow data-clip style="--x1:35%;--y1:30%">
+        <div class="ph-img" data-inner></div>
+        <figcaption>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span><span id="monthCaption">Image: witch hazel in frost by the east gate</span><small>PORTRAIT 4:5 · CHANGES WITH THE MONTH</small></span>
+        </figcaption>
+      </figure>
+    </div>
+    <ul class="months" id="months" data-stagger></ul>
+  </div>
+</section>
 
-  // where the branch runs in the picture (image uv, 0..1), used by the touch-screen wanderer
-  const branchV = u => 0.655 - 0.035 * u;
+<!-- ======== 2. grounds ======== -->
+<section class="grounds wrap" id="grounds" aria-labelledby="groundsTitle">
+  <div class="inner">
+    <figure class="ph r-5x4 grounds-map" data-grow data-clip style="--x1:60%;--y1:45%;--x2:25%;--y2:70%">
+      <div class="ph-img" data-inner></div>
+      <figcaption>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 3.5 5.5 2l5 1.5 4-1.5v10.5l-4 1.5-5-1.5-4 1.5z M5.5 2v10.5 M10.5 3.5V14" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        <span>Image: illustrated map of the six areas, gate at the bottom left<small>LANDSCAPE 5:4 · ILLUSTRATION</small></span>
+      </figcaption>
+    </figure>
+    <div class="grounds-copy">
+      <h2 class="display" id="groundsTitle" data-lines>Forty acres, <em>six ways in.</em></h2>
+      <p class="lead" data-reveal>Every path loops back to the gate. The longest walk takes about an hour if you stop to look, and most people stop.</p>
+      <ul class="areas" data-stagger>
+        <li><h3>Moss Hollow</h3><span class="data">4 MIN</span><p>A sunken path under old oaks, with fifty kinds of moss on stone and bark.</p></li>
+        <li><h3>Long Meadow</h3><span class="data">9 MIN</span><p>Grasses and wildflowers mown once a year, with a bench at the top for the view.</p></li>
+        <li><h3>Fern Gully</h3><span class="data">12 MIN</span><p>A cool stream valley where tree ferns stay green through winter.</p></li>
+        <li><h3>The Walled Garden</h3><span class="data">15 MIN</span><p>Brick walls hold the warmth for roses, figs and early hellebores.</p></li>
+        <li><h3>Lily Ponds</h3><span class="data">18 MIN</span><p>Three still ponds, dragonflies in summer and herons all year.</p></li>
+        <li><h3>The Glasshouse</h3><span class="data">22 MIN</span><p>A Victorian palm house that stays at 18°C, even in January.</p></li>
+      </ul>
+    </div>
+  </div>
+</section>
 
-  let W = 0, H = 0, dpr = 1, panX = 0.5, cover = { ox: 0, oy: 0, dw: 1, dh: 1 };
-  function layout() {
-    const r = hero.getBoundingClientRect();
-    dpr = Math.min(2, window.devicePixelRatio || 1);
-    W = Math.max(1, Math.round(r.width * dpr)); H = Math.max(1, Math.round(r.height * dpr));
-    canvas.width = W; canvas.height = H;
-    // portrait screens see a narrow slice; lean it toward the long run of branch with the fork in view
-    panX = r.width / r.height < 0.9 ? 0.55 : 0.5;
-    const panY = 0.45;
-    hero.style.setProperty("--pan-x", panX * 100 + "%");
-    const s = Math.max(W / IW, H / IH);
-    const dw = IW * s, dh = IH * s;
-    cover = { ox: (W - dw) * panX, oy: (H - dh) * panY, dw, dh };
-    if (gl) gl.viewport(0, 0, W, H);
-  }
+<!-- ======== 3. interlude ======== -->
+<section class="interlude" aria-label="The north wall">
+  <div class="interlude-stick">
+    <figure class="ph" id="interludePh" style="--x1:50%;--y1:55%;--x2:20%;--y2:30%">
+      <div class="ph-img" data-inner></div>
+      <figcaption>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        <span>Image: close-up of moss on the north wall, morning light<small>FULL BLEED · 16:9 OR WIDER</small></span>
+      </figcaption>
+    </figure>
+    <p class="interlude-quote" id="interludeQuote"><span data-lines>Ninety kinds of moss grow on <em>one wall.</em></span><span class="data" data-reveal>WE HAVE NOT CLEANED IT SINCE 1911</span></p>
+  </div>
+</section>
 
-  // ---------- pointer → a point in picture space ----------
-  let pointer = null;           // {u, v} in picture uv, or null when the cursor is away
-  let lastInput = -1e9;
-  let interacted = false;
-  function toPicture(clientX, clientY) {
-    const r = hero.getBoundingClientRect();
-    return {
-      u: ((clientX - r.left) * dpr - cover.ox) / cover.dw,
-      v: ((clientY - r.top) * dpr - cover.oy) / cover.dh,
-    };
-  }
-  function seen() {
-    lastInput = performance.now();
-    if (!interacted) { interacted = true; setTimeout(() => hint.classList.add("gone"), 2400); }
-  }
-  if (!reduce) {
-    hero.addEventListener("pointermove", e => {
-      if (e.pointerType === "mouse" && e.movementX === 0 && e.movementY === 0 && !pointer) return; // synthetic
-      pointer = toPicture(e.clientX, e.clientY); seen();
-    }, { passive: true });
-    hero.addEventListener("pointerdown", e => { pointer = toPicture(e.clientX, e.clientY); seen(); });
-    hero.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") pointer = null; });
-    const lift = e => { if (e.pointerType !== "mouse") { pointer = null; lastInput = performance.now(); } };
-    hero.addEventListener("pointerup", lift);
-    hero.addEventListener("pointercancel", lift);
-  }
+<!-- ======== 4. visit ======== -->
+<section class="visit wrap" id="visit" aria-labelledby="visitTitle">
+  <div class="inner">
+    <div class="visit-head">
+      <h2 class="display" id="visitTitle" data-lines>Open <em>every day</em> of the year.</h2>
+      <p class="lead" data-reveal>Christmas Day included. Book ahead on weekends in April and May, when the bluebells bring everyone.</p>
+    </div>
+    <div class="visit-grid">
+      <figure class="ph r-4x5" data-grow data-clip style="--x1:40%;--y1:60%">
+        <div class="ph-img" data-inner></div>
+        <figcaption>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span>Image: the iron east gate, half open, path behind it<small>PORTRAIT 4:5</small></span>
+        </figcaption>
+      </figure>
+      <div class="facts" data-reveal>
+        <h3>Opening hours</h3>
+        <dl>
+          <dt>March to October</dt><dd>09:00–18:00</dd>
+          <dt>November to February</dt><dd>09:00–16:30</dd>
+          <dt>Last entry</dt><dd>1 hr before</dd>
+          <dt>Members' early hour</dt><dd>Sat 07:30</dd>
+        </dl>
+        <p class="visit-note">Dogs on short leads are welcome everywhere except the Glasshouse.</p>
+      </div>
+      <div class="facts" data-reveal style="--d:120ms">
+        <h3>Tickets</h3>
+        <dl>
+          <dt>Adult</dt><dd>£14.00</dd>
+          <dt>Child, 5 to 16</dt><dd>£6.00</dd>
+          <dt>Under 5</dt><dd>Free</dd>
+          <dt>Members</dt><dd>Free</dd>
+        </dl>
+        <p class="visit-note">Twenty minutes by bus from Ashcombe station. Parking for 120 cars, free for ticket holders.</p>
+        <a class="btn btn-solid" href="#visit">Book tickets
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
-  // ---------- growth field ----------
-  // Each cell eases toward 1 near the cursor and back to 0 away from it. Moss shows where the field
-  // passes a noisy threshold, so the edge creeps along the bark instead of sliding as a hard circle.
-  function radiusPx() { return Math.min(377, Math.max(170, 0.234 * W / dpr)) * dpr; }
-  let prevC = null;
-  function stepField(dt, c) {
-    const R = radiusPx(), inner = R * 0.12;
-    const rise = 1 - Math.exp(-dt / 0.115), fall = 1 - Math.exp(-dt / 0.32);
-    // stamp along the whole path the cursor took since the last frame, so fast sweeps leave no gaps
-    const cx = c ? c.u * cover.dw : 0, cy = c ? c.v * cover.dh : 0;
-    const px = c && prevC ? prevC.u * cover.dw : cx, py = c && prevC ? prevC.v * cover.dh : cy;
-    const sgx = cx - px, sgy = cy - py, sl = sgx * sgx + sgy * sgy || 1;
-    prevC = c;
-    const sx = cover.dw / GW, sy = cover.dh / GH;
-    for (let j = 0; j < GH; j++) {
-        for (let i = 0; i < GW; i++) {
-        const k = j * GW + i;
-        let t = 0;
-        if (c) {
-          const qx = (i + 0.5) * sx, qy = (j + 0.5) * sy;
-          const h = Math.min(1, Math.max(0, ((qx - px) * sgx + (qy - py) * sgy) / sl));
-          const dx = qx - (px + sgx * h), ey = qy - (py + sgy * h);
-          const d = Math.sqrt(dx * dx + ey * ey);
-          if (d < R) { const x = Math.min(1, Math.max(0, (d - inner) / (R - inner))); t = Math.pow(1 - x, 1.6); }
-        }
-        const g = grow[k];
-        grow[k] = g + (t - g) * (t > g ? rise : fall);
-        growBytes[k] = grow[k] * 255;
-      }
-    }
-  }
-  function settleField(c) { for (let n = 0; n < 60; n++) stepField(0.1, c); }
+<!-- ======== 5. membership ======== -->
+<section class="membership shade wrap" id="membership" aria-labelledby="memberTitle">
+  <div class="inner">
+    <div class="member-copy">
+      <h2 class="display" id="memberTitle" data-lines>A year of <em>early mornings.</em></h2>
+      <p class="lead" data-reveal>Members walk in before the gates open, when the mist is still on the meadow and the only footprints are the deer's.</p>
+      <div class="price" data-reveal><b>£68</b><span>a year, for two adults<br>and up to three children</span></div>
+      <ul class="perks" data-stagger>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m2 7.5 3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited visits, every day of the year</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m2 7.5 3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Early entry from 07:30 on Saturdays</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m2 7.5 3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Four guest passes to give away</li>
+        <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m2 7.5 3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>10% off in the café and plant shop</li>
+      </ul>
+      <div class="ctas" data-reveal><a class="btn btn-solid" href="#membership">Become a member</a><a class="btn btn-line" href="#membership">Give it as a gift</a></div>
+    </div>
+    <div class="member-ph-wrap">
+      <figure class="ph r-4x5" data-grow data-clip style="--x1:55%;--y1:35%">
+        <div class="ph-img" data-inner></div>
+        <figcaption>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span>Image: mist over Long Meadow at 07:30, one walker<small>PORTRAIT 4:5</small></span>
+        </figcaption>
+      </figure>
+      <figure class="ph r-1x1 small" data-grow data-parallax="-60" style="--x1:30%;--y1:60%;--x2:70%;--y2:30%">
+        <div class="ph-img" data-inner></div>
+        <figcaption>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span>Image: member card on a bench<small>SQUARE 1:1</small></span>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
 
-  // the touch-screen wanderer: when nobody is touching, an invisible hand drifts along the branch
-  function wanderer(now) {
-    const u0 = -cover.ox / cover.dw, u1 = (W - cover.ox) / cover.dw;
-    const span = u1 - u0, mid = (u0 + u1) / 2;
-    const t = now / 1000;
-    const u = mid + span * 0.34 * Math.sin(t * 0.32) + span * 0.04 * Math.sin(t * 0.9);
-    return { u, v: branchV(u) - 0.05 + 0.04 * Math.sin(t * 0.55) };
-  }
+<!-- ======== 6. journal ======== -->
+<section class="journal wrap" id="journal" aria-labelledby="journalTitle">
+  <div class="inner">
+    <div class="journal-head">
+      <h2 class="display" id="journalTitle" data-lines>Notes from <em>the potting shed.</em></h2>
+      <a class="btn btn-line" href="#journal" data-reveal>Read the journal</a>
+    </div>
+    <div class="journal-grid">
+      <a class="post big" href="#journal">
+        <figure class="ph r-3x2" data-grow data-clip style="--x1:45%;--y1:40%">
+          <div class="ph-img" data-inner></div>
+          <figcaption>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            <span>Image: gardener's hands on a mossy stone<small>LANDSCAPE 3:2</small></span>
+          </figcaption>
+        </figure>
+        <span class="data" data-reveal>14 NOV 2026 · 6 MIN READ</span>
+        <h3 data-lines>Why we never scrub the moss off the north wall</h3>
+        <p data-reveal>It holds water, feeds the wrens and keeps the brick cool in August. A short history of doing nothing on purpose.</p>
+      </a>
+      <div class="side-posts">
+        <a class="post" href="#journal">
+          <figure class="ph r-1x1" data-grow data-clip style="--x1:30%;--y1:30%">
+            <div class="ph-img" data-inner></div>
+            <figcaption><span>Image: snowdrop bulbs in a crate<small>SQUARE 1:1</small></span></figcaption>
+          </figure>
+          <div>
+            <span class="data" data-reveal>28 OCT 2026</span>
+            <h3 data-lines>Planting 4,000 snowdrops in one weekend</h3>
+          </div>
+        </a>
+        <a class="post" href="#journal">
+          <figure class="ph r-1x1" data-grow data-clip style="--x1:60%;--y1:70%">
+            <div class="ph-img" data-inner></div>
+            <figcaption><span>Image: lily pads under a skin of ice<small>SQUARE 1:1</small></span></figcaption>
+          </figure>
+          <div>
+            <span class="data" data-reveal>09 OCT 2026</span>
+            <h3 data-lines>The pond lilies are resting, and so are we</h3>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 
-  // ---------- WebGL2 renderer ----------
-  let gl = null, prog, texGrow, uni = {};
-  const VS = `#version 300 es
-  in vec2 a; void main(){ gl_Position = vec4(a, 0., 1.); }`;
-  const FS = `#version 300 es
-  precision highp float;
-  uniform sampler2D uBare, uMoss, uMask, uGrow;
-  uniform vec2 uRes, uOff, uSize; uniform float uTime;
-  out vec4 o;
-  float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
-  float noise(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.-2.*f);
-    return mix(mix(hash(i), hash(i+vec2(1,0)), f.x), mix(hash(i+vec2(0,1)), hash(i+vec2(1,1)), f.x), f.y); }
-  float fbm(vec2 p){ float s = 0., a = .5; for (int k = 0; k < 4; k++){ s += a * noise(p); p *= 2.03; a *= .5; } return s / .9375; }
-  void main(){
-    vec2 p = vec2(gl_FragCoord.x, uRes.y - gl_FragCoord.y);
-    vec2 uv = (p - uOff) / uSize;
-    vec3 bare = texture(uBare, uv).rgb;
-    vec3 moss = texture(uMoss, uv).rgb;
-    vec2 mk = texture(uMask, uv).rg;           // r: where the picture changes (moss), g: flower heads
-    float g = texture(uGrow, uv).r;
-    // two scales of noise: broad patches plus fine tufts, so the front frays like real moss
-    float n = .5 * fbm(uv * vec2(16., 7.8) + vec2(uTime * .01, 0.)) + .5 * fbm(uv * vec2(130., 63.));
-    // moss takes hold first where it is thickest, then creeps out to the fronds
-    float th = -.05 + .95 * n - .2 * mk.r;
-    float m = smoothstep(th, th + .08, g);
-    // flowers open only once the moss around them is established
-    float bt = th + .26;
-    float bl = smoothstep(bt, bt + .14, g);
-    vec3 bud = textureLod(uMoss, uv, 4.5).rgb * vec3(.78, .9, .52);
-    vec3 col = mix(moss, mix(bud, moss, bl), mk.g);
-    col += mk.g * bl * (1. - bl) * .55;        // a small flash as each flower opens
-    vec3 outc = mix(bare, col, m);
-    // a soft band of sunlight just along the growing front, flickering slightly like dew
-    float edge = smoothstep(th - .16, th, g) * (1. - smoothstep(th + .02, th + .16, g));
-    float dew = .75 + .25 * sin(uTime * 3. + n * 40.);
-    float lum = dot(outc, vec3(.3, .59, .11));
-    outc += edge * dew * smoothstep(.1, .5, mk.r) * vec3(1., .94, .7) * (.2 + .32 * lum);
-    o = vec4(outc, 1.);
-  }`;
-  function initGL(bareI, mossI, maskI) {
-    gl = canvas.getContext("webgl2", { antialias: false, premultipliedAlpha: false, preserveDrawingBuffer: false });
-    if (!gl) return false;
-    const sh = (t, s) => { const x = gl.createShader(t); gl.shaderSource(x, s); gl.compileShader(x);
-      if (!gl.getShaderParameter(x, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(x)); return x; };
-    prog = gl.createProgram();
-    gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
-    gl.linkProgram(prog); gl.useProgram(prog);
-    const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 3,-1, -1,3]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, "a"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    const tex = (unit, img, mip) => {
-      const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, mip ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR);
-      if (img) { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); if (mip) gl.generateMipmap(gl.TEXTURE_2D); }
-      return t;
-    };
-    tex(0, bareI, true); tex(1, mossI, true); tex(2, maskI, false);
-    texGrow = tex(3, null, false);
-    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-    ["uBare","uMoss","uMask","uGrow","uRes","uOff","uSize","uTime"].forEach(n => uni[n] = gl.getUniformLocation(prog, n));
-    gl.uniform1i(uni.uBare, 0); gl.uniform1i(uni.uMoss, 1); gl.uniform1i(uni.uMask, 2); gl.uniform1i(uni.uGrow, 3);
-    return true;
-  }
-  function drawGL(now) {
-    gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, texGrow);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, GW, GH, 0, gl.RED, gl.UNSIGNED_BYTE, growBytes);
-    gl.uniform2f(uni.uRes, W, H); gl.uniform2f(uni.uOff, cover.ox, cover.oy); gl.uniform2f(uni.uSize, cover.dw, cover.dh);
-    gl.uniform1f(uni.uTime, now / 1000);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  }
+</main>
 
-  // ---------- 2D fallback: a soft round window onto the mossy picture ----------
-  let ctx = null, mossImg2d = null, fade = 0, last2d = null;
-  function draw2D(dt, c) {
-    fade += ((c ? 1 : 0) - fade) * (1 - Math.exp(-dt / 0.4));
-    if (c) last2d = c;
-    ctx.clearRect(0, 0, W, H);
-    if (!last2d || fade < 0.01) return;
-    const x = cover.ox + last2d.u * cover.dw, y = cover.oy + last2d.v * cover.dh, R = radiusPx() * fade;
-    ctx.save();
-    ctx.drawImage(mossImg2d, cover.ox, cover.oy, cover.dw, cover.dh);
-    ctx.globalCompositeOperation = "destination-in";
-    const gr = ctx.createRadialGradient(x, y, R * 0.2, x, y, R);
-    gr.addColorStop(0, "rgba(0,0,0,1)"); gr.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
-    ctx.restore();
-  }
+<!-- ======== footer ======== -->
+<footer class="shade">
+  <div class="foot-wrap wrap">
+    <div class="inner">
+      <div class="foot-top">
+        <p class="big-mark" data-lines>Come back <em>next month.</em></p>
+        <form class="signup" id="signup" novalidate>
+          <label for="email">One short letter a month on what is about to flower.</label>
+          <div class="row">
+            <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+            <button class="btn btn-solid" type="submit">Subscribe</button>
+          </div>
+          <output id="signupMsg" aria-live="polite"></output>
+        </form>
+      </div>
+      <div class="foot-cols">
+        <div><h4>Find us</h4><ul><li>Hollowmere Lane</li><li>Ashcombe</li><li class="data">AS4 9HL</li></ul></div>
+        <div><h4>Visit</h4><ul><li><a href="#visit">Hours and tickets</a></li><li><a href="#grounds">Map of the grounds</a></li><li><a href="#visit">Getting here</a></li><li><a href="#visit">Accessibility</a></li></ul></div>
+        <div><h4>Garden</h4><ul><li><a href="#seasons">What's in flower</a></li><li><a href="#journal">Journal</a></li><li><a href="#membership">Membership</a></li><li><a href="#membership">Volunteering</a></li></ul></div>
+        <div><h4>Today</h4><ul><li class="data">09:00–16:30</li><li>Last entry 15:30</li><li>Café open until 16:00</li></ul></div>
+      </div>
+      <p class="legal">© 2026 Hollowmere Garden Trust. Placeholder content.</p>
+    </div>
+  </div>
+</footer>
 
-  // ---------- boot ----------
-  const load = src => new Promise((res, rej) => { const i = new Image(); i.decoding = "async"; i.onload = () => res(i); i.onerror = rej; i.src = src; });
-  Promise.all([load("assets/bare.jpg"), load("assets/mossy.jpg"), load("assets/mask.png")]).then(([b, m, k]) => {
-    let useGL = false;
-    try { gl = null; useGL = initGL(b, m, k); } catch (err) { console.warn(err); gl = null; useGL = false; }
-    if (!useGL) { ctx = canvas.getContext("2d"); mossImg2d = m; }
-    layout();
-    new ResizeObserver(() => { layout(); if (reduce) still(); }).observe(hero);
-
-    // reduced motion: no growing and no following; one still patch of moss on the fork of the branch
-    function still() {
-      const spot = { u: 0.72, v: 0.6 };
-      if (useGL) { grow.fill(0); settleField(spot); drawGL(0); } else { fade = 1; last2d = spot; draw2D(1, spot); }
-    }
-    canvas.classList.add("ready");
-    if (reduce) { hint.hidden = true; still(); return; }
-
-    let prev = performance.now();
-    function frame(now) {
-      const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
-      let c = pointer;
-      if (!c && coarse && now - lastInput > 2500) c = wanderer(now);
-      if (useGL) { stepField(dt, c); drawGL(now); } else draw2D(dt, c);
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }).catch(() => { /* pictures failed to load: the bare branch stays as a still background */ });
-})();
-</script>
+<script src="assets/hero.js"></script>
+<script src="assets/site.js"></script>
 </body>
 </html>

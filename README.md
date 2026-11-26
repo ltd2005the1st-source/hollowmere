@@ -1,18 +1,24 @@
 # Hollowmere Garden
 
-Promo site for a garden that is open all year. So far it has the hero section only.
+Promo site for a woodland garden that is open all year. It is one page with no build step.
 
-## The hero
+## What's on the page
 
-The background is a bare branch. When the cursor moves near it, moss creeps along the bark and wildflowers open around the cursor. The growth follows the cursor and fades back to bare wood behind it.
+- **Hero:** the background is a bare branch. When the cursor moves near it, moss creeps along the bark and wildflowers open around the cursor, then fade back to bare wood behind it. Light mode uses the day pictures and dark mode uses the night ones.
+- **Sections:** Seasons (a month picker), The grounds (six areas with walking times), a full-screen interlude, Visit (hours and tickets), Membership and Journal, followed by the footer.
+- **Navigation:** a fixed top bar with links to each section and a light/dark toggle. On phones it opens as a full-screen menu.
+- **Motion:** headings drop in line by line, pictures grow into place as you scroll, and the interlude opens out to full screen. A ticker shows what's in flower this week. With reduced motion turned on, all of this becomes simple fades.
+- **Scrolling:** the Daybook scroll engine. Mouse-wheel scrolling glides smoothly, nav links glide to their section, and the highlighted nav link and the address bar follow the section on screen.
 
-- `index.html`: the whole hero (HTML, CSS, and a small WebGL2 shader, with no build step).
-- `assets/bare.jpg`, `assets/mossy.jpg`: the two pictures, with the same framing.
-- `assets/mask.png`: shows where the two pictures differ. The red channel marks moss and the green channel marks flower heads. The shader uses it so moss takes hold first and flowers open last.
+All names, prices and copy are placeholders. Every image placeholder is labelled with the photo it needs and its aspect ratio.
 
-On touch screens the growth drifts along the branch by itself, and visitors can drag a finger to move it. With reduced motion turned on, the page shows one still patch of moss. Browsers without WebGL2 get a simple soft reveal instead.
+## Files
 
-All names and copy (Hollowmere, est. 1911, 40 acres, opening hours) are placeholders.
+- `index.html`: the markup and CSS.
+- `assets/hero.js`: the WebGL2 moss reveal, with a 2D canvas fallback.
+- `assets/site.js`: the theme toggle, menu, month picker, scroll motion and the scroll engine.
+- `assets/bare.jpg`, `assets/mossy.jpg`, `assets/mask.png`: the day picture pair. In the mask, the red channel marks moss and the green channel marks flower heads.
+- `assets/night-*.jpg`, `assets/night-mask.png`: the night picture pair.
 
 ## Run it locally
 
