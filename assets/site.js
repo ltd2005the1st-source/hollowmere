@@ -169,6 +169,59 @@
     clearTimeout(rsT); rsT = setTimeout(splitAll, 180);
   });
 
+  /* ---------------- font pairing preview ---------------- */
+  const FONTS = window.HM_FONTS || {};
+  const NAMES = {
+    "": "Cormorant + Hanken Grotesk",
+    "fraunces-inter": "Fraunces + Inter",
+    "garamond-work": "Cormorant Garamond + Work Sans",
+    "dmserif-dmsans": "DM Serif Display + DM Sans",
+    "newsreader-instrument": "Newsreader + Instrument Sans",
+    "bricolage-sourceserif": "Bricolage Grotesque + Source Serif 4",
+  };
+  const ORDER = Object.keys(NAMES);
+  const fontBtn = document.getElementById("fontBtn");
+  const fontPanel = document.getElementById("fontPanel");
+  const fontLabel = document.getElementById("fontBtnLabel");
+  const ensureFont = key => {
+    if (!key || document.getElementById("font-" + key)) return;
+    const l = document.createElement("link");
+    l.rel = "stylesheet"; l.id = "font-" + key;
+    l.href = "https://fonts.googleapis.com/css2?" + FONTS[key] + "&display=swap";
+    document.head.appendChild(l);
+  };
+  const currentFonts = () => root.getAttribute("data-fonts") || "";
+  function syncFontUI() {
+    const k = currentFonts();
+    fontLabel.textContent = NAMES[k];
+    fontPanel.querySelectorAll("button[data-f]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.f === k)));
+  }
+  function setFonts(key) {
+    ensureFont(key);
+    if (key) root.setAttribute("data-fonts", key); else root.removeAttribute("data-fonts");
+    try { key ? localStorage.setItem("hm-fonts", key) : localStorage.removeItem("hm-fonts"); } catch (e) {}
+    syncFontUI();
+    // headings were split into lines with the old metrics: split again once the new faces arrive
+    (document.fonts?.ready || Promise.resolve()).then(() => setTimeout(splitAll, 60));
+    setTimeout(splitAll, 700);
+  }
+  function toggleFontPanel(open = fontPanel.hidden) {
+    fontPanel.hidden = !open;
+    fontBtn.setAttribute("aria-expanded", String(open));
+    if (open) ORDER.forEach(ensureFont); // so each option can show itself in its own faces
+  }
+  fontBtn.addEventListener("click", () => toggleFontPanel());
+  fontPanel.addEventListener("click", e => { const b = e.target.closest("button[data-f]"); if (b) setFonts(b.dataset.f); });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !fontPanel.hidden) { toggleFontPanel(false); fontBtn.focus(); }
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || "");
+    if ((e.key === "f" || e.key === "F") && !typing && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      setFonts(ORDER[(ORDER.indexOf(currentFonts()) + 1) % ORDER.length]);
+    }
+  });
+  document.addEventListener("pointerdown", e => { if (!fontPanel.hidden && !e.target.closest("#fontpick")) toggleFontPanel(false); });
+  syncFontUI();
+
   /* ---------------- reveal on entry ---------------- */
   // A clipped element has no visible area, so pictures are watched through their parent.
   const watched = new Map();
