@@ -42,6 +42,7 @@
   --petal-deep: #a9455f;      /* petal on daylight */
   --shadow: 20, 22, 13;
   --scrim: 20, 22, 13;
+  --map-photo: none;          /* the illustrated map is dimmed a little at night */
 
   --f-display: "Bricolage Grotesque", "Helvetica Neue", Arial, system-ui, sans-serif;
   --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
@@ -64,7 +65,7 @@
     --lichen: #11130c; --lichen-2: #171a10; --paper: #1b1e14;
     --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14); --rule-strong: rgba(232, 235, 219, .3);
     --moss-deep: #c4cd70; --moss-wash: rgba(196, 205, 112, .12); --petal-deep: #eeb4c2;
-    --shadow: 0, 0, 0;
+    --shadow: 0, 0, 0; --map-photo: brightness(.82) saturate(.9);
     color-scheme: dark;
   }
 }
@@ -73,7 +74,7 @@
     --lichen: #11130c; --lichen-2: #171a10; --paper: #1b1e14;
     --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14); --rule-strong: rgba(232, 235, 219, .3);
     --moss-deep: #c4cd70; --moss-wash: rgba(196, 205, 112, .12); --petal-deep: #eeb4c2;
-    --shadow: 0, 0, 0;
+    --shadow: 0, 0, 0; --map-photo: brightness(.82) saturate(.9);
     color-scheme: dark;
 }
 /* tight tracking for the grotesque display; it has no italic, so emphasis is carried by colour */
@@ -453,6 +454,29 @@ main {
 .map .draw { stroke-dasharray: var(--len) var(--len); transition: stroke-dashoffset 2200ms var(--ease-move); transition-delay: var(--dd, 0ms); }
 .js .map:not(.in) .pop { opacity: 0; transform: translateY(6px); }
 .map .pop { transition: opacity 700ms ease, transform 900ms var(--ease-out); transition-delay: var(--dd, 0ms); transform-box: fill-box; }
+.map-pins { display: none; }
+.map.has-photo .map-pins { display: block; position: absolute; inset: 0; pointer-events: none; }
+.map.has-photo .route:not(.on) { opacity: 0; }
+.map.has-photo .route.on { stroke: var(--petal-deep); stroke-width: 3; filter: drop-shadow(0 1px 0 rgba(255,255,255,.7)); }
+.map.has-photo .frame-in img { transform: none; filter: var(--map-photo, none); }
+.pin {
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);
+  pointer-events: auto; cursor: pointer; white-space: nowrap;
+  padding: 6px 11px; border-radius: 999px; background: rgba(250, 247, 236, .92); color: #2a2d1f;
+  font-family: var(--f-display); font-size: 13.5px; letter-spacing: -.01em; line-height: 1;
+  box-shadow: 0 2px 10px rgba(40, 36, 20, .18), inset 0 0 0 1px rgba(40, 36, 20, .12);
+  transition: background-color 300ms ease, color 300ms ease, transform 400ms var(--ease-out);
+}
+.pin.end { transform: translate(-100%, -50%); }
+.pin.on { background: #a9455f; color: #fbf3ef; }
+.pin.gate-pin { background: #2a2d1f; color: #f3f0e6; font-family: var(--f-mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; cursor: default; }
+.js .map.has-photo:not(.in) .pin { opacity: 0; transform: translate(-50%, -30%); }
+.js .map.has-photo:not(.in) .pin.end { transform: translate(-100%, -30%); }
+.map.has-photo .pin { transition: opacity 700ms ease, transform 900ms var(--ease-out), background-color 300ms ease, color 300ms ease; }
+.map.has-photo.in .pin:nth-child(2) { transition-delay: 150ms; } .map.has-photo.in .pin:nth-child(3) { transition-delay: 250ms; }
+.map.has-photo.in .pin:nth-child(4) { transition-delay: 350ms; } .map.has-photo.in .pin:nth-child(5) { transition-delay: 450ms; }
+.map.has-photo.in .pin:nth-child(6) { transition-delay: 550ms; } .map.has-photo.in .pin:nth-child(7) { transition-delay: 650ms; }
+@media (max-width: 600px) { .pin { font-size: 11.5px; padding: 5px 8px; } }
 .map-key { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; color: var(--ink-2); font-size: 14px; }
 .map-key span { display: inline-flex; align-items: center; gap: 8px; }
 .map-key i { width: 18px; height: 0; border-top: 1.6px dotted var(--rule-strong); }
@@ -879,7 +903,7 @@ body.curtain footer { position: sticky; bottom: 0; }
 <!-- ======== opening statement ======== -->
 <section class="about wrap" aria-label="About the garden">
   <div class="inner">
-    <p class="manifesto" data-fill>Hollowmere is forty acres <span class="inlay" aria-hidden="true"><img src="assets/stand/i-a.jpg" alt="" loading="lazy"></span> of woodland and meadow on the edge of Ashcombe. Nothing is planted for <em>one big week.</em> Something flowers <span class="inlay" aria-hidden="true"><img src="assets/stand/i-b.jpg" alt="" loading="lazy"></span> on every day of the year, and the gates are open on all of them.</p>
+    <p class="manifesto" data-fill>Hollowmere is forty acres <span class="inlay" aria-hidden="true"><img src="assets/pills/meadow.jpg" alt="" loading="lazy"></span> of woodland and meadow on the edge of Ashcombe. Nothing is planted for <em>one big week.</em> Something flowers <span class="inlay" aria-hidden="true"><img src="assets/pills/bluebells.jpg" alt="" loading="lazy"></span> on every day of the year, and the gates are open on all of them.</p>
     <div class="about-foot" data-reveal>
       <span class="data" data-scramble>THE HOLLOWMERE GARDEN TRUST · SINCE 1911</span>
       <a class="btn btn-line" href="#grounds">Walk the grounds
@@ -923,7 +947,7 @@ body.curtain footer { position: sticky; bottom: 0; }
     </div>
     <div class="grounds-body">
       <div class="map-wrap">
-        <figure class="frame map" id="map" data-photo="grounds-map.jpg" aria-label="Map of the grounds">
+        <figure class="frame map" id="map" data-photo="grounds-map.jpg" aria-label="Illustrated map of the grounds">
           <div class="frame-in" id="mapPhoto"></div>
           <svg viewBox="0 0 600 480" role="img" aria-labelledby="mapTitle">
             <title id="mapTitle">Map of the six areas, with paths from the gate in the bottom left</title>
@@ -936,12 +960,12 @@ body.curtain footer { position: sticky; bottom: 0; }
               <path class="ink draw" style="--dd:300ms" d="M96 96 C128 130 100 170 116 210 C130 246 104 276 96 300"/>
             </g>
             <g id="routes">
-              <path class="route" data-route="0" d="M70 440 C100 420 124 398 152 370"/>
-              <path class="route" data-route="1" d="M70 440 C140 420 190 360 230 300 C258 252 280 210 298 168"/>
-              <path class="route" data-route="2" d="M70 440 C58 400 78 336 98 304 C108 288 112 272 114 258"/>
-              <path class="route" data-route="3" d="M70 440 C150 456 228 412 270 340"/>
-              <path class="route" data-route="4" d="M70 440 C200 470 330 440 380 404 C408 384 428 372 444 366"/>
-              <path class="route" data-route="5" d="M70 440 C200 460 360 420 420 330 C450 286 478 240 496 196"/>
+              <path class="route" data-route="0" data-pd="M170 374 C185 350 205 335 210 322 C215 300 212 280 207 264 C195 240 165 230 152 216 C138 200 132 182 128 164 C124 148 112 128 103 112" d="M70 440 C100 420 124 398 152 370"/>
+              <path class="route" data-route="1" data-pd="M170 374 C190 340 230 312 261 304 C278 280 282 240 280 204 C278 180 278 160 280 137 C284 118 296 102 307 94" d="M70 440 C140 420 190 360 230 300 C258 252 280 210 298 168"/>
+              <path class="route" data-route="2" data-pd="M170 374 C190 340 230 312 261 304 C290 270 320 200 352 180 C390 170 410 182 428 186 C470 196 520 206 548 214" d="M70 440 C58 400 78 336 98 304 C108 288 112 272 114 258"/>
+              <path class="route" data-route="3" data-pd="M170 374 C190 340 230 312 261 304 C290 300 330 318 377 322" d="M70 440 C150 456 228 412 270 340"/>
+              <path class="route" data-route="4" data-pd="M170 374 C190 352 225 345 255 349 C280 352 296 368 307 377 C318 386 330 394 343 398" d="M70 440 C200 470 330 440 380 404 C408 384 428 372 444 366"/>
+              <path class="route" data-route="5" data-pd="M170 374 C200 360 240 362 262 384 C290 412 320 440 352 448 C400 458 440 456 474 452 C490 450 504 446 513 441" d="M70 440 C200 460 360 420 420 330 C450 286 478 240 496 196"/>
             </g>
             <g class="draw-only">
               <g class="area pop" data-area="0" style="--dd:500ms">
@@ -984,7 +1008,15 @@ body.curtain footer { position: sticky; bottom: 0; }
             </g>
             <circle class="walker" id="walker" r="6" cx="70" cy="440"/>
           </svg>
-          <span class="chip"><i></i><span>Drawn map · grounds-map.jpg goes here</span></span>
+          <div class="map-pins" id="mapPins" aria-hidden="true">
+            <span class="pin gate-pin" style="--x:28.4%;--y:84%">The gate</span>
+            <span class="pin" data-area="0" style="--x:17%;--y:20%">Moss Hollow</span>
+            <span class="pin" data-area="1" style="--x:53%;--y:30%">Long Meadow</span>
+            <span class="pin end" data-area="2" style="--x:97%;--y:30%">Fern Gully</span>
+            <span class="pin" data-area="3" style="--x:76%;--y:45%">The Walled Garden</span>
+            <span class="pin" data-area="4" style="--x:58%;--y:92%">Lily Ponds</span>
+            <span class="pin end" data-area="5" style="--x:97%;--y:75%">The Glasshouse</span>
+          </div>
         </figure>
         <div class="map-key" aria-hidden="true"><span><i></i>Paths from the gate</span><span><i class="on"></i>The route you picked</span></div>
       </div>
@@ -1004,8 +1036,7 @@ body.curtain footer { position: sticky; bottom: 0; }
 <section class="interlude" aria-label="The north wall">
   <div class="interlude-stick">
     <figure class="frame" id="interludePh">
-      <div class="frame-in"><img class="stand" src="assets/stand/w-pano.jpg" data-photo="north-wall.jpg" alt="Moss and lichen on the north wall" loading="lazy"></div>
-      <span class="chip"><i></i><span>Stand-in photo · north-wall.jpg</span></span>
+      <div class="frame-in"><img src="assets/photos/north-wall.jpg" data-photo="north-wall.jpg" alt="Moss and lichen on the north wall" loading="lazy"></div>
     </figure>
     <div class="inter-copy">
       <p class="interlude-quote" data-fill="scrub">Ninety kinds of moss grow on <em>one wall.</em></p>
@@ -1019,12 +1050,12 @@ body.curtain footer { position: sticky; bottom: 0; }
   <div class="mq-head wrap"><span class="data">IN FLOWER THIS WEEK</span><span class="data" id="mqWeek"></span></div>
   <div class="mq-track" id="mqTrack">
     <ul>
-      <li><span>Witch hazel by the east gate</span><i class="thumb"><img src="assets/stand/i-a.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Hellebores in the Walled Garden</span><i class="thumb"><img src="assets/stand/i-b.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Holly berries along Long Meadow</span><i class="thumb"><img src="assets/stand/i-c.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Hair-cap moss on the north wall</span><i class="thumb"><img src="assets/stand/i-a.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Winter box by the glasshouse door</span><i class="thumb"><img src="assets/stand/i-b.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Cyclamen under the beeches</span><i class="thumb"><img src="assets/stand/i-c.jpg" alt="" loading="lazy"></i></li>
+      <li><span>Witch hazel by the east gate</span><i class="thumb"><img src="assets/pills/witch.jpg" alt="" loading="lazy"></i></li>
+      <li><span>Hellebores in the Walled Garden</span><i class="thumb"><img src="assets/pills/snowdrop.jpg" alt="" loading="lazy"></i></li>
+      <li><span>Holly berries along Long Meadow</span><i class="thumb"><img src="assets/pills/holly.jpg" alt="" loading="lazy"></i></li>
+      <li><span>Hair-cap moss on the north wall</span><i class="thumb"><img src="assets/pills/moss.jpg" alt="" loading="lazy"></i></li>
+      <li><span>Winter box by the glasshouse door</span><i class="thumb"><img src="assets/pills/seed.jpg" alt="" loading="lazy"></i></li>
+      <li><span>Cyclamen under the beeches</span><i class="thumb"><img src="assets/pills/bluebells.jpg" alt="" loading="lazy"></i></li>
     </ul>
   </div>
 </div>
@@ -1044,8 +1075,7 @@ body.curtain footer { position: sticky; bottom: 0; }
       <div class="vfact"><b data-count>120</b><span>Parking spaces, free for ticket holders</span></div>
       <div class="gate-wrap arch-line" data-watch>
         <figure class="frame arch r-4x5 rise" style="--d:150ms">
-          <div class="frame-in"><img class="stand" src="assets/stand/p-twig.jpg" data-photo="visit-gate.jpg" alt="The iron east gate, half open, with the path behind it" loading="lazy" style="--tone: saturate(.9) brightness(.98)"></div>
-          <span class="chip"><i></i><span>Stand-in photo · visit-gate.jpg</span></span>
+          <div class="frame-in"><img src="assets/photos/visit-gate.jpg" data-photo="visit-gate.jpg" alt="The iron east gate, half open, with the path behind it" loading="lazy"></div>
         </figure>
       </div>
       <svg class="links-svg" id="linksSvg" aria-hidden="true"></svg>
@@ -1119,13 +1149,11 @@ body.curtain footer { position: sticky; bottom: 0; }
     <div class="member-media">
       <div class="arch-line" data-watch>
         <figure class="frame arch r-4x5 rise">
-          <div class="frame-in"><img class="stand" src="assets/stand/p-night.jpg" data-photo="member-meadow.jpg" alt="Mist over Long Meadow at 07:30, one walker" loading="lazy" data-par="40"></div>
-          <span class="chip"><i></i><span>Stand-in photo · member-meadow.jpg</span></span>
+          <div class="frame-in"><img src="assets/photos/member-meadow.jpg" data-photo="member-meadow.jpg" alt="Mist over Long Meadow at 07:30, one walker" loading="lazy" data-par="40"></div>
         </figure>
       </div>
       <figure class="frame r-1x1 small wipe" data-watch data-parallax="-70" style="--d:300ms">
-        <div class="frame-in"><img class="stand" src="assets/stand/s-night.jpg" data-photo="member-card.jpg" alt="A membership card on a mossy bench" loading="lazy"></div>
-        <span class="chip"><i></i><span>Stand-in · member-card.jpg</span></span>
+        <div class="frame-in"><img src="assets/photos/member-card.jpg" data-photo="member-card.jpg" alt="A membership card on a mossy bench" loading="lazy"></div>
       </figure>
     </div>
   </div>
@@ -1144,8 +1172,7 @@ body.curtain footer { position: sticky; bottom: 0; }
     <div class="journal-grid">
       <a class="post big" href="#journal" id="leadPost">
         <figure class="frame r-3x2 wipe" data-watch>
-          <div class="frame-in"><img class="stand" src="assets/stand/l-branch.jpg" data-photo="journal-hands-moss.jpg" alt="A gardener's hands on a mossy stone" loading="lazy" data-par="30"></div>
-          <span class="chip"><i></i><span>Stand-in photo · journal-hands-moss.jpg</span></span>
+          <div class="frame-in"><img src="assets/photos/journal-hands-moss.jpg" data-photo="journal-hands-moss.jpg" alt="A gardener's hands on a mossy stone" loading="lazy" data-par="30"></div>
         </figure>
         <span class="data" data-scramble>14 NOV 2026 · 6 MIN READ</span>
         <h3 data-lines><span class="u">Why we never scrub the moss off the north wall</span></h3>
@@ -1160,8 +1187,7 @@ body.curtain footer { position: sticky; bottom: 0; }
               <p>Forty volunteers, two trowels each and a lot of soup.</p>
             </div>
             <figure class="frame r-1x1">
-              <div class="frame-in"><img class="stand" src="assets/stand/s-left.jpg" data-photo="journal-snowdrops.jpg" alt="Snowdrop bulbs in a crate" loading="lazy" style="--tone: saturate(.6) brightness(1.04)"></div>
-              <span class="chip"><i></i><span>journal-snowdrops.jpg</span></span>
+              <div class="frame-in"><img src="assets/photos/journal-snowdrops.jpg" data-photo="journal-snowdrops.jpg" alt="Snowdrop bulbs in a crate" loading="lazy"></div>
             </figure>
           </a>
         </li>
@@ -1173,8 +1199,7 @@ body.curtain footer { position: sticky; bottom: 0; }
               <p>What happens under the ice between November and March.</p>
             </div>
             <figure class="frame r-1x1">
-              <div class="frame-in"><img class="stand" src="assets/stand/s-macro.jpg" data-photo="journal-ice-lilies.jpg" alt="Lily pads under a skin of ice" loading="lazy" style="--tone: saturate(.45) hue-rotate(30deg) brightness(.95)"></div>
-              <span class="chip"><i></i><span>journal-ice-lilies.jpg</span></span>
+              <div class="frame-in"><img src="assets/photos/journal-ice-lilies.jpg" data-photo="journal-ice-lilies.jpg" alt="Lily pads under a skin of ice" loading="lazy"></div>
             </figure>
           </a>
         </li>

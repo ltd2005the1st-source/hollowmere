@@ -23,7 +23,7 @@ All names, prices and copy are placeholders.
 
 ## Photos
 
-Every picture slot shows a stand-in cut from the hero photography (`assets/stand/`) until its real photo exists. Hover a picture to see which file it is waiting for, or add `?chips` to the address to see them all. The file names and how to switch a slot over are in `assets/photos/README.md`; the prompts for generating them are in the project's image prompt list.
+The section photos live in `assets/photos/` (file names and sizes are in `assets/photos/README.md`). The illustrated map has its area names and walking routes laid over it in the browser. The small photo pills in the opening statement and the flower line come from `assets/pills/`. If a photo is ever missing from the `PHOTOS` list in `assets/site.js`, its slot falls back to a stand-in cut from the hero photography (`assets/stand/`).
 
 ## Files
 
@@ -31,7 +31,8 @@ Every picture slot shows a stand-in cut from the hero photography (`assets/stand
 - `assets/hero.js`: the WebGL2 moss reveal, with a 2D canvas fallback.
 - `assets/site.js`: the intro, theme toggle, menu, text and photo reveals, month picker, map, stems, marquee, opening hours, ticket counter, member card, footer and the scroll engine. The `PHOTOS` list at the top says which real photos are in place.
 - `assets/stand/`: stand-in pictures cut from the hero photography.
-- `assets/photos/`: where the finished section photos go.
+- `assets/photos/`: the section photos.
+- `assets/pills/`: small crops of those photos for the opening statement and the flower line.
 - `assets/bare.jpg`, `assets/mossy.jpg`, `assets/mask.png`: the day picture pair. In the mask, the red channel marks moss and the green channel marks flower heads.
 - `assets/night-*.jpg`, `assets/night-mask.png`: the night picture pair.
 

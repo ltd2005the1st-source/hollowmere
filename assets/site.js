@@ -17,7 +17,10 @@
      Every picture slot names the photo it is waiting for (data-photo). Until that file is in assets/photos/,
      the slot shows a stand-in cut from the hero photography. When a photo arrives, add its file name here. */
   const PHOTOS = [
-    // "month-01.jpg", "grounds-map.jpg", "north-wall.jpg", "visit-gate.jpg", ...
+    "month-01.jpg", "month-02.jpg", "month-03.jpg", "month-04.jpg", "month-05.jpg", "month-06.jpg",
+    "month-07.jpg", "month-08.jpg", "month-09.jpg", "month-10.jpg", "month-11.jpg", "month-12.jpg",
+    "grounds-map.jpg", "north-wall.jpg", "visit-gate.jpg", "member-meadow.jpg", "member-card.jpg",
+    "journal-hands-moss.jpg", "journal-snowdrops.jpg", "journal-ice-lilies.jpg",
   ];
   const photoUrl = name => (name && PHOTOS.includes(name) ? "assets/photos/" + name : null);
   $$("img[data-photo]").forEach(img => {
@@ -30,6 +33,8 @@
   if (photoUrl(mapEl.dataset.photo)) {
     $("#mapPhoto").innerHTML = `<img src="${photoUrl(mapEl.dataset.photo)}" alt="" style="transform:none">`;
     mapEl.classList.add("has-photo");
+    // the walking routes follow the paths drawn in the illustration instead of the sketch
+    mapEl.querySelectorAll(".route").forEach(r => r.setAttribute("d", r.dataset.pd));
   }
   // ?chips shows every slot's label at once, for whoever is generating the photos
   if (/[?&]chips\b/.test(location.search)) root.classList.add("show-chips");
@@ -314,7 +319,7 @@
     const layer = document.createElement("div");
     layer.className = "layer" + (instant || reduce ? "" : " enter");
     const img = document.createElement("img");
-    img.alt = "Photo to come: " + need;
+    img.alt = (real ? "" : "Photo to come: ") + need.charAt(0).toUpperCase() + need.slice(1);
     img.src = real || "assets/stand/" + stand;
     if (!real) { img.className = "stand"; img.style.setProperty("--tone", tone); }
     layer.appendChild(img);
@@ -343,6 +348,7 @@
   /* ---------------- grounds map ---------------- */
   const routes = $$(".route", mapEl), areaGs = $$(".area", mapEl), areaBtns = $$(".area-btn");
   const walker = $("#walker");
+  const pins = [...document.querySelectorAll("#mapPins .pin[data-area]")];
   $$(".draw", mapEl).forEach(p => p.style.setProperty("--len", Math.ceil(p.getTotalLength()) + 1));
   let area = -1, wraf = 0;
   function walk(i) {
@@ -364,6 +370,7 @@
     areaBtns.forEach((b, j) => b.setAttribute("aria-pressed", String(i === j)));
     areaGs.forEach(g => g.classList.toggle("on", +g.dataset.area === i));
     routes.forEach(r => r.classList.toggle("on", +r.dataset.route === i));
+    pins.forEach(p => p.classList.toggle("on", +p.dataset.area === i));
     walk(i);
   }
   areaBtns.forEach((b, i) => {
@@ -372,6 +379,7 @@
     if (fine) b.addEventListener("pointerenter", () => setArea(i));
   });
   areaGs.forEach(g => g.addEventListener("click", () => setArea(+g.dataset.area)));
+  pins.forEach(p => p.addEventListener("click", () => setArea(+p.dataset.area)));
   when(mapEl, () => setTimeout(() => { if (area < 0) setArea(0); }, reduce ? 0 : 1500));
 
   /* ---------------- section-break stems ---------------- */
