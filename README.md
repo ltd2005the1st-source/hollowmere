@@ -23,7 +23,7 @@ All names, prices and copy are placeholders.
 
 ## Photos
 
-The section photos live in `assets/photos/` (file names and sizes are in `assets/photos/README.md`). The illustrated map has its area names and walking routes laid over it in the browser. The small photo pills in the opening statement and the flower line come from `assets/pills/`. If a photo is ever missing from the `PHOTOS` list in `assets/site.js`, its slot falls back to a stand-in cut from the hero photography (`assets/stand/`).
+The section photos live in `assets/photos/` as AVIF with a WebP fallback (slots, sizes and how to rebuild them are in `assets/photos/README.md`). Photos below the first screen load only as you scroll near them. In Seasons, the months either side of today's are fetched once the list is on screen, and the rest when a pointer moves onto the list. The illustrated map has its area names and walking routes laid over it in the browser. The small photo pills in the opening statement and the flower line come from `assets/pills/`. If a photo is ever missing from the `PHOTOS` list in `assets/site.js`, its slot falls back to a stand-in cut from the hero photography (`assets/stand/`).
 
 ## Files
 
@@ -33,8 +33,9 @@ The section photos live in `assets/photos/` (file names and sizes are in `assets
 - `assets/stand/`: stand-in pictures cut from the hero photography.
 - `assets/photos/`: the section photos.
 - `assets/pills/`: small crops of those photos for the opening statement and the flower line.
-- `assets/bare.jpg`, `assets/mossy.jpg`, `assets/mask.png`: the day picture pair. In the mask, the red channel marks moss and the green channel marks flower heads.
-- `assets/night-*.jpg`, `assets/night-mask.png`: the night picture pair.
+- `assets/bare.webp`, `assets/mossy.webp`, `assets/mask.webp`: the day picture pair. In the mask, the red channel marks moss and the green channel marks flower heads. The mask is lossless so those channels stay exact.
+- `assets/night-*.webp`: the night picture pair.
+- `tools/make-photos.py`: builds the section photos from the original PNGs.
 
 ## Run it locally
 

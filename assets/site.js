@@ -14,24 +14,35 @@
   let active = "top", jumping = null, jraf = 0, stopJump = null, jumpEnded = 0;
 
   /* ---------------- photos ----------------
-     Every picture slot names the photo it is waiting for (data-photo). Until that file is in assets/photos/,
-     the slot shows a stand-in cut from the hero photography. When a photo arrives, add its file name here. */
+     Every picture slot names the photo it shows (data-photo). Each photo is in assets/photos/ twice:
+     an AVIF that most browsers load, and a WebP for the rest (tools/make-photos.py builds both).
+     A slot whose photo is not on this list shows a stand-in cut from the hero photography instead. */
   const PHOTOS = [
-    "month-01.jpg", "month-02.jpg", "month-03.jpg", "month-04.jpg", "month-05.jpg", "month-06.jpg",
-    "month-07.jpg", "month-08.jpg", "month-09.jpg", "month-10.jpg", "month-11.jpg", "month-12.jpg",
-    "grounds-map.jpg", "north-wall.jpg", "visit-gate.jpg", "member-meadow.jpg", "member-card.jpg",
-    "journal-hands-moss.jpg", "journal-snowdrops.jpg", "journal-ice-lilies.jpg",
+    "month-01", "month-02", "month-03", "month-04", "month-05", "month-06",
+    "month-07", "month-08", "month-09", "month-10", "month-11", "month-12",
+    "grounds-map", "north-wall", "visit-gate", "member-meadow", "member-card",
+    "journal-hands-moss", "journal-snowdrops", "journal-ice-lilies",
   ];
   const photoUrl = name => (name && PHOTOS.includes(name) ? "assets/photos/" + name : null);
+  // <picture> lets the browser take the AVIF when it can read it and the WebP when it cannot
+  const picture = (base, attrs = "") =>
+    `<picture><source type="image/avif" srcset="${base}.avif"><img src="${base}.webp" decoding="async" ${attrs}></picture>`;
+  // warm a photo into the cache in whichever format this browser will ask for
+  const avifTest = new Promise(res => {
+    const t = new Image();
+    t.onload = () => res(t.width > 0); t.onerror = () => res(false);
+    t.src = "data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADrbWV0YQAAAAAAAAAhaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAETAAAAIQAAAChpaW5mAAAAAAABAAAAGmluZmUCAAAAAAEAAGF2MDFDb2xvcgAAAABqaXBycAAAAEtpcGNvAAAAFGlzcGUAAAAAAAAAAQAAAAEAAAAQcGl4aQAAAAADCAgIAAAADGF2MUOBAAwAAAAAE2NvbHJuY2x4AAEADQAGgAAAABdpcG1hAAAAAAAAAAEAAQQBAoMEAAAAKW1kYXQSAAoIGAAGiAhoNCAyExlHh4Yhh5555oAAAJBAyRxhQr4=";
+  });
+  const warmed = new Set();
+  const warm = base => { if (!base || warmed.has(base)) return; warmed.add(base); avifTest.then(a => { new Image().src = base + (a ? ".avif" : ".webp"); }); };
   $$("img[data-photo]").forEach(img => {
-    const url = photoUrl(img.dataset.photo);
-    if (!url) return;
-    img.src = url; img.classList.remove("stand");
+    if (!photoUrl(img.dataset.photo)) return;
+    img.classList.remove("stand");
     img.closest("figure")?.classList.add("has-photo");
   });
   const mapEl = $("#map");
   if (photoUrl(mapEl.dataset.photo)) {
-    $("#mapPhoto").innerHTML = `<img src="${photoUrl(mapEl.dataset.photo)}" alt="" style="transform:none">`;
+    $("#mapPhoto").innerHTML = picture(photoUrl(mapEl.dataset.photo), `alt="" loading="lazy" style="transform:none"`);
     mapEl.classList.add("has-photo");
     // the walking routes follow the paths drawn in the illustration instead of the sketch
     mapEl.querySelectorAll(".route").forEach(r => r.setAttribute("d", r.dataset.pd));
@@ -297,7 +308,7 @@
     ["OCT", "Maple colour and cyclamen", "Fern Gully", "red maples over Fern Gully", "p-fork.jpg", "sepia(.5) hue-rotate(-22deg) saturate(1.35)"],
     ["NOV", "Mosses and holly berries", "North wall", "moss on the north wall after rain", "p-night.jpg", "brightness(1.12) saturate(.9)"],
     ["DEC", "Frosted seedheads and winter box", "Long Meadow", "frosted seedheads at sunrise", "p-bare.jpg", "saturate(.25) brightness(1.12) hue-rotate(12deg)"],
-  ].map((m, i) => [...m, `month-${String(i + 1).padStart(2, "0")}.jpg`]);
+  ].map((m, i) => [...m, `month-${String(i + 1).padStart(2, "0")}`]);
   const monthsEl = $("#months");
   const layers = $("#seasonLayers"), seasonFrame = $("#seasonFrame"), seasonCap = $("#seasonCap"), seasonChip = $("#seasonChip span");
   const now = new Date().getMonth();
@@ -318,15 +329,20 @@
     const real = photoUrl(file);
     const layer = document.createElement("div");
     layer.className = "layer" + (instant || reduce ? "" : " enter");
-    const img = document.createElement("img");
-    img.alt = (real ? "" : "Photo to come: ") + need.charAt(0).toUpperCase() + need.slice(1);
-    img.src = real || "assets/stand/" + stand;
-    if (!real) { img.className = "stand"; img.style.setProperty("--tone", tone); }
-    layer.appendChild(img);
-    layers.appendChild(layer);
-    const old = [...layers.children].slice(0, -1);
-    if (instant || reduce) old.forEach(o => o.remove());
-    else setTimeout(() => old.forEach(o => o.remove()), 1050);
+    const alt = (real ? "" : "Photo to come: ") + need.charAt(0).toUpperCase() + need.slice(1);
+    if (real) layer.innerHTML = picture(real, instant ? 'loading="lazy"' : "");
+    else layer.innerHTML = `<img class="stand" src="assets/stand/${stand}" style="--tone:${tone}">`;
+    const img = $("img", layer); img.alt = alt;
+    const show = () => {
+      if (month !== i) return; // a later month was picked while this one was loading
+      layers.appendChild(layer);
+      const old = [...layers.children].slice(0, -1);
+      if (instant || reduce) old.forEach(o => o.remove());
+      else setTimeout(() => old.forEach(o => o.remove()), 1050);
+    };
+    // wipe the new month in only once its picture is ready, so the arch never opens onto an empty frame
+    if (instant) show();
+    else Promise.race([img.decode().catch(() => {}), new Promise(r => setTimeout(r, 900))]).then(show);
     seasonFrame.classList.toggle("has-photo", !!real);
     seasonChip.textContent = `Stand-in photo · ${file} · ${need}`;
     // caption slides in with the new picture
@@ -344,6 +360,18 @@
     });
   }
   pickMonth(now, true);
+  // fetch the months either side of today's once the picker is near the screen, and the rest when a pointer
+  // moves onto the list, so picking one feels instant without spending data on months nobody looks at
+  const net = navigator.connection || {};
+  if (!net.saveData && !/2g/.test(net.effectiveType || "")) {
+    const warmMonth = k => warm(photoUrl(MONTHS[(k + 12) % 12][6]));
+    new IntersectionObserver(([e], obs) => {
+      if (!e.isIntersecting) return;
+      obs.disconnect();
+      setTimeout(() => { warmMonth(now + 1); warmMonth(now - 1); }, 800);
+    }, { rootMargin: "200px 0px" }).observe(seasonFrame);
+    if (fine) monthsEl.addEventListener("pointerenter", () => MONTHS.forEach((_, k) => warmMonth(now + k)), { once: true });
+  }
 
   /* ---------------- grounds map ---------------- */
   const routes = $$(".route", mapEl), areaGs = $$(".area", mapEl), areaBtns = $$(".area-btn");

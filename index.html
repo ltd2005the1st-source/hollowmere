@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hollowmere Garden</title>
 <meta name="description" content="A woodland garden you can visit every day of the year.">
+<!-- the hero pictures gate the opening curtain, so start fetching them before anything else -->
+<link rel="preload" as="image" href="assets/bare.webp" type="image/webp" fetchpriority="high" media="(prefers-color-scheme: light)">
+<link rel="preload" as="image" href="assets/mossy.webp" type="image/webp" media="(prefers-color-scheme: light)">
+<link rel="preload" as="image" href="assets/night-bare.webp" type="image/webp" fetchpriority="high" media="(prefers-color-scheme: dark)">
+<link rel="preload" as="image" href="assets/night-mossy.webp" type="image/webp" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -99,6 +104,7 @@ body::after {
 }
 ::selection { background: var(--moss); color: var(--bark); }
 img { max-width: 100%; display: block; }
+picture { display: contents; }
 a { color: inherit; text-underline-offset: .18em; text-decoration-thickness: 1px; }
 :focus-visible { outline: 2px solid var(--petal-deep); outline-offset: 3px; border-radius: 3px; }
 .shade :focus-visible, .hero :focus-visible, .site-nav :focus-visible, .menu :focus-visible { outline-color: var(--petal); }
@@ -872,7 +878,7 @@ body.curtain footer { position: sticky; bottom: 0; }
 
 <!-- ======== hero ======== -->
 <section class="hero" id="top" aria-label="Hollowmere Garden">
-  <img class="bare" id="bareImg" src="assets/bare.jpg" alt="A bare tree branch against a soft, blurred woodland">
+  <picture><source srcset="assets/night-bare.webp" media="(prefers-color-scheme: dark)"><img class="bare" id="bareImg" src="assets/bare.webp" fetchpriority="high" alt="A bare tree branch against a soft, blurred woodland"></picture>
   <canvas class="garden" id="garden" aria-hidden="true"></canvas>
   <div class="scrim"></div>
   <div class="hero-veil" id="heroVeil"></div>
@@ -903,7 +909,7 @@ body.curtain footer { position: sticky; bottom: 0; }
 <!-- ======== opening statement ======== -->
 <section class="about wrap" aria-label="About the garden">
   <div class="inner">
-    <p class="manifesto" data-fill>Hollowmere is forty acres <span class="inlay" aria-hidden="true"><img src="assets/pills/meadow.jpg" alt="" loading="lazy"></span> of woodland and meadow on the edge of Ashcombe. Nothing is planted for <em>one big week.</em> Something flowers <span class="inlay" aria-hidden="true"><img src="assets/pills/bluebells.jpg" alt="" loading="lazy"></span> on every day of the year, and the gates are open on all of them.</p>
+    <p class="manifesto" data-fill>Hollowmere is forty acres <span class="inlay" aria-hidden="true"><img src="assets/pills/meadow.webp" alt="" loading="lazy"></span> of woodland and meadow on the edge of Ashcombe. Nothing is planted for <em>one big week.</em> Something flowers <span class="inlay" aria-hidden="true"><img src="assets/pills/bluebells.webp" alt="" loading="lazy"></span> on every day of the year, and the gates are open on all of them.</p>
     <div class="about-foot" data-reveal>
       <span class="data" data-scramble>THE HOLLOWMERE GARDEN TRUST · SINCE 1911</span>
       <a class="btn btn-line" href="#grounds">Walk the grounds
@@ -947,7 +953,7 @@ body.curtain footer { position: sticky; bottom: 0; }
     </div>
     <div class="grounds-body">
       <div class="map-wrap">
-        <figure class="frame map" id="map" data-photo="grounds-map.jpg" aria-label="Illustrated map of the grounds">
+        <figure class="frame map" id="map" data-photo="grounds-map" aria-label="Illustrated map of the grounds">
           <div class="frame-in" id="mapPhoto"></div>
           <svg viewBox="0 0 600 480" role="img" aria-labelledby="mapTitle">
             <title id="mapTitle">Map of the six areas, with paths from the gate in the bottom left</title>
@@ -1036,7 +1042,7 @@ body.curtain footer { position: sticky; bottom: 0; }
 <section class="interlude" aria-label="The north wall">
   <div class="interlude-stick">
     <figure class="frame" id="interludePh">
-      <div class="frame-in"><img src="assets/photos/north-wall.jpg" data-photo="north-wall.jpg" alt="Moss and lichen on the north wall" loading="lazy"></div>
+      <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/north-wall.avif"><img src="assets/photos/north-wall.webp" data-photo="north-wall" decoding="async" alt="Moss and lichen on the north wall" loading="lazy"></picture></div>
     </figure>
     <div class="inter-copy">
       <p class="interlude-quote" data-fill="scrub">Ninety kinds of moss grow on <em>one wall.</em></p>
@@ -1050,12 +1056,12 @@ body.curtain footer { position: sticky; bottom: 0; }
   <div class="mq-head wrap"><span class="data">IN FLOWER THIS WEEK</span><span class="data" id="mqWeek"></span></div>
   <div class="mq-track" id="mqTrack">
     <ul>
-      <li><span>Witch hazel by the east gate</span><i class="thumb"><img src="assets/pills/witch.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Hellebores in the Walled Garden</span><i class="thumb"><img src="assets/pills/snowdrop.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Holly berries along Long Meadow</span><i class="thumb"><img src="assets/pills/holly.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Hair-cap moss on the north wall</span><i class="thumb"><img src="assets/pills/moss.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Winter box by the glasshouse door</span><i class="thumb"><img src="assets/pills/seed.jpg" alt="" loading="lazy"></i></li>
-      <li><span>Cyclamen under the beeches</span><i class="thumb"><img src="assets/pills/bluebells.jpg" alt="" loading="lazy"></i></li>
+      <li><span>Witch hazel by the east gate</span><i class="thumb"><img src="assets/pills/witch.webp" alt="" loading="lazy"></i></li>
+      <li><span>Hellebores in the Walled Garden</span><i class="thumb"><img src="assets/pills/snowdrop.webp" alt="" loading="lazy"></i></li>
+      <li><span>Holly berries along Long Meadow</span><i class="thumb"><img src="assets/pills/holly.webp" alt="" loading="lazy"></i></li>
+      <li><span>Hair-cap moss on the north wall</span><i class="thumb"><img src="assets/pills/moss.webp" alt="" loading="lazy"></i></li>
+      <li><span>Winter box by the glasshouse door</span><i class="thumb"><img src="assets/pills/seed.webp" alt="" loading="lazy"></i></li>
+      <li><span>Cyclamen under the beeches</span><i class="thumb"><img src="assets/pills/bluebells.webp" alt="" loading="lazy"></i></li>
     </ul>
   </div>
 </div>
@@ -1075,7 +1081,7 @@ body.curtain footer { position: sticky; bottom: 0; }
       <div class="vfact"><b data-count>120</b><span>Parking spaces, free for ticket holders</span></div>
       <div class="gate-wrap arch-line" data-watch>
         <figure class="frame arch r-4x5 rise" style="--d:150ms">
-          <div class="frame-in"><img src="assets/photos/visit-gate.jpg" data-photo="visit-gate.jpg" alt="The iron east gate, half open, with the path behind it" loading="lazy"></div>
+          <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/visit-gate.avif"><img src="assets/photos/visit-gate.webp" data-photo="visit-gate" decoding="async" alt="The iron east gate, half open, with the path behind it" loading="lazy"></picture></div>
         </figure>
       </div>
       <svg class="links-svg" id="linksSvg" aria-hidden="true"></svg>
@@ -1149,11 +1155,11 @@ body.curtain footer { position: sticky; bottom: 0; }
     <div class="member-media">
       <div class="arch-line" data-watch>
         <figure class="frame arch r-4x5 rise">
-          <div class="frame-in"><img src="assets/photos/member-meadow.jpg" data-photo="member-meadow.jpg" alt="Mist over Long Meadow at 07:30, one walker" loading="lazy" data-par="40"></div>
+          <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/member-meadow.avif"><img src="assets/photos/member-meadow.webp" data-photo="member-meadow" decoding="async" alt="Mist over Long Meadow at 07:30, one walker" loading="lazy" data-par="40"></picture></div>
         </figure>
       </div>
       <figure class="frame r-1x1 small wipe" data-watch data-parallax="-70" style="--d:300ms">
-        <div class="frame-in"><img src="assets/photos/member-card.jpg" data-photo="member-card.jpg" alt="A membership card on a mossy bench" loading="lazy"></div>
+        <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/member-card.avif"><img src="assets/photos/member-card.webp" data-photo="member-card" decoding="async" alt="A membership card on a mossy bench" loading="lazy"></picture></div>
       </figure>
     </div>
   </div>
@@ -1172,7 +1178,7 @@ body.curtain footer { position: sticky; bottom: 0; }
     <div class="journal-grid">
       <a class="post big" href="#journal" id="leadPost">
         <figure class="frame r-3x2 wipe" data-watch>
-          <div class="frame-in"><img src="assets/photos/journal-hands-moss.jpg" data-photo="journal-hands-moss.jpg" alt="A gardener's hands on a mossy stone" loading="lazy" data-par="30"></div>
+          <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/journal-hands-moss.avif"><img src="assets/photos/journal-hands-moss.webp" data-photo="journal-hands-moss" decoding="async" alt="A gardener's hands on a mossy stone" loading="lazy" data-par="30"></picture></div>
         </figure>
         <span class="data" data-scramble>14 NOV 2026 · 6 MIN READ</span>
         <h3 data-lines><span class="u">Why we never scrub the moss off the north wall</span></h3>
@@ -1187,7 +1193,7 @@ body.curtain footer { position: sticky; bottom: 0; }
               <p>Forty volunteers, two trowels each and a lot of soup.</p>
             </div>
             <figure class="frame r-1x1">
-              <div class="frame-in"><img src="assets/photos/journal-snowdrops.jpg" data-photo="journal-snowdrops.jpg" alt="Snowdrop bulbs in a crate" loading="lazy"></div>
+              <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/journal-snowdrops.avif"><img src="assets/photos/journal-snowdrops.webp" data-photo="journal-snowdrops" decoding="async" alt="Snowdrop bulbs in a crate" loading="lazy"></picture></div>
             </figure>
           </a>
         </li>
@@ -1199,7 +1205,7 @@ body.curtain footer { position: sticky; bottom: 0; }
               <p>What happens under the ice between November and March.</p>
             </div>
             <figure class="frame r-1x1">
-              <div class="frame-in"><img src="assets/photos/journal-ice-lilies.jpg" data-photo="journal-ice-lilies.jpg" alt="Lily pads under a skin of ice" loading="lazy"></div>
+              <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/journal-ice-lilies.avif"><img src="assets/photos/journal-ice-lilies.webp" data-photo="journal-ice-lilies" decoding="async" alt="Lily pads under a skin of ice" loading="lazy"></picture></div>
             </figure>
           </a>
         </li>

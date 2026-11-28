@@ -230,8 +230,8 @@
   const load = src => new Promise((res, rej) => { const i = new Image(); i.decoding = "async"; i.onload = () => res(i); i.onerror = rej; i.src = src; });
   // day pictures in light mode, night pictures in dark mode
   const SETS = {
-    day: ["assets/bare.jpg", "assets/mossy.jpg", "assets/mask.png"],
-    night: ["assets/night-bare.jpg", "assets/night-mossy.jpg", "assets/night-mask.png"],
+    day: ["assets/bare.webp", "assets/mossy.webp", "assets/mask.webp"],
+    night: ["assets/night-bare.webp", "assets/night-mossy.webp", "assets/night-mask.webp"],
   };
   const darkMQ = matchMedia("(prefers-color-scheme: dark)");
   const isDark = () => {
@@ -241,6 +241,8 @@
   const cache = {};
   const loadSet = name => cache[name] || (cache[name] = Promise.all(SETS[name].map(load)));
   let current = isDark() ? "night" : "day";
+  // the page picks the night picture by the system setting before this runs; from here the theme toggle decides
+  bareImg.closest("picture")?.querySelector("source")?.remove();
   bareImg.src = SETS[current][0];
   loadSet(current).then(([b, m, k]) => {
     let useGL = false;
