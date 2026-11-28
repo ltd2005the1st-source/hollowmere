@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Hollowmere Garden</title>
 <meta name="description" content="A woodland garden you can visit every day of the year.">
+<!-- the hero pictures gate the opening curtain, so start fetching them before anything else -->
+<link rel="preload" as="image" href="assets/bare.webp" type="image/webp" fetchpriority="high" media="(prefers-color-scheme: light)">
+<link rel="preload" as="image" href="assets/mossy.webp" type="image/webp" media="(prefers-color-scheme: light)">
+<link rel="preload" as="image" href="assets/night-bare.webp" type="image/webp" fetchpriority="high" media="(prefers-color-scheme: dark)">
+<link rel="preload" as="image" href="assets/night-mossy.webp" type="image/webp" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -13,30 +18,36 @@
     var r = document.documentElement;
     r.classList.add("js");
     try { var t = localStorage.getItem("hm-theme"); if (t === "dark" || t === "light") r.setAttribute("data-theme", t); } catch (e) {}
-    // if the motion script never runs, show the headings anyway
+    // if the motion script never runs, show the text anyway
     setTimeout(function () { r.classList.add("ready"); }, 2500);
   })();
 </script>
 <style>
-/* Layout: a dark woodland hero where moss grows under the cursor, then the page steps into daylight:
-   pale lichen grounds for reading, with bark-dark bands for the moments that should feel like shade.
+/* Layout: a walk from the gate inwards. A dark woodland hero where moss grows under the cursor, then a pale
+   lichen sheet slides over it for reading. Arches (the Walled Garden's doorways) frame the portrait photos,
+   hand-drawn stems mark the breaks between sections, and bark-dark bands hold the moments that should feel like shade.
    Mono is only used for data people check: months, times, prices, walking minutes. */
 :root {
   --bark: #16170f;            /* shade: hero, membership, footer */
   --bark-2: #212318;          /* raised surface inside shade */
   --lichen: #e5e9da;          /* daylight ground */
   --lichen-2: #d9dfca;        /* alternate daylight band */
+  --paper: #f1f3ea;           /* raised paper on daylight: panels, the map */
   --ink: #1c2015;             /* text on daylight */
   --ink-2: #4a5140;           /* secondary text on daylight */
   --rule: rgba(28, 32, 21, .16);
+  --rule-strong: rgba(28, 32, 21, .34);
   --cream: #f3f0e6;           /* text in shade */
   --cream-2: rgba(243, 240, 230, .74);
   --cream-rule: rgba(243, 240, 230, .18);
   --moss: #cdd47f;            /* sunlit moss, used in shade */
   --moss-deep: #56621a;       /* moss on daylight */
+  --moss-wash: rgba(86, 98, 26, .14);
   --petal: #f1c7d0;           /* petal in shade */
   --petal-deep: #a9455f;      /* petal on daylight */
+  --shadow: 20, 22, 13;
   --scrim: 20, 22, 13;
+  --map-photo: none;          /* the illustrated map is dimmed a little at night */
 
   --f-display: "Bricolage Grotesque", "Helvetica Neue", Arial, system-ui, sans-serif;
   --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
@@ -44,48 +55,58 @@
   --w-display: 400;
   --fsa: .43;                /* trims the grotesque's tall x-height to the scale the sizes were set on */
 
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-move: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);    /* expo out: every entrance */
+  --ease-move: cubic-bezier(0.65, 0, 0.35, 1);  /* in-out: things that travel */
+  --ease-curtain: cubic-bezier(0.76, 0, 0.24, 1);
   --pad: clamp(0px, 3.4vw, 44px);
-  --section: clamp(88px, 12vw, 168px);
-  --nav-h: 72px;
+  --section: clamp(96px, 12vw, 176px);
+  --nav-h: 76px;
+  --sheet-r: clamp(20px, 3vw, 36px);
 }
 /* night: the daylight grounds turn to a dark wood; shade bands go deeper still */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bark: #080906; --bark-2: #1c1f15;
-    --lichen: #11130c; --lichen-2: #181b11;
-    --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14);
-    --moss-deep: #c4cd70; --petal-deep: #eeb4c2;
+    --lichen: #11130c; --lichen-2: #171a10; --paper: #1b1e14;
+    --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14); --rule-strong: rgba(232, 235, 219, .3);
+    --moss-deep: #c4cd70; --moss-wash: rgba(196, 205, 112, .12); --petal-deep: #eeb4c2;
+    --shadow: 0, 0, 0; --map-photo: brightness(.82) saturate(.9);
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
     --bark: #080906; --bark-2: #1c1f15;
-    --lichen: #11130c; --lichen-2: #181b11;
-    --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14);
-    --moss-deep: #c4cd70; --petal-deep: #eeb4c2;
+    --lichen: #11130c; --lichen-2: #171a10; --paper: #1b1e14;
+    --ink: #e8ebdb; --ink-2: #aab09a; --rule: rgba(232, 235, 219, .14); --rule-strong: rgba(232, 235, 219, .3);
+    --moss-deep: #c4cd70; --moss-wash: rgba(196, 205, 112, .12); --petal-deep: #eeb4c2;
+    --shadow: 0, 0, 0; --map-photo: brightness(.82) saturate(.9);
     color-scheme: dark;
 }
 /* tight tracking for the grotesque display; it has no italic, so emphasis is carried by colour */
-:is(.display, .hero h1, .interlude-quote, .big-mark, .menu ul a) { letter-spacing: -.035em; }
-:is(.big-mark, .interlude-quote, .menu) em { font-style: normal; }
-:is(.display, .hero h1, .wordmark, .menu ul a, .ticker li, .months .what, .areas h3, .interlude-quote, .facts h3, .price b, .post h3, .big-mark) { font-size-adjust: var(--fsa); }
+:is(.display, .hero h1, .interlude-quote, .big-mark, .menu ul a, .manifesto, .giant) { letter-spacing: -.035em; }
+:is(.big-mark, .interlude-quote, .menu, .display, .manifesto) em { font-style: normal; }
+:is(.display, .hero h1, .wordmark, .menu ul a, .mq li, .months .what, .area-name, .interlude-quote, .vfact b, .panel h3, .mcard b, .post h3, .big-mark, .manifesto, .season-cap b, .giant, .intro-mark) { font-size-adjust: var(--fsa); }
 html { scroll-padding-top: var(--nav-h); }
 body {
   margin: 0;
-  background: var(--lichen);
+  background: var(--bark);
   color: var(--ink);
   font-family: var(--f-body);
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 17px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
+/* film grain over everything: fixed, composited once, never repainted on scroll */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 90; pointer-events: none;
+  background-image: var(--grain, none); background-size: 160px; opacity: .07;
+}
 ::selection { background: var(--moss); color: var(--bark); }
-img { max-width: 100%; }
-a { color: inherit; }
-:focus-visible { outline: 2px solid var(--petal-deep); outline-offset: 3px; border-radius: 2px; }
+img { max-width: 100%; display: block; }
+picture { display: contents; }
+a { color: inherit; text-underline-offset: .18em; text-decoration-thickness: 1px; }
+:focus-visible { outline: 2px solid var(--petal-deep); outline-offset: 3px; border-radius: 3px; }
 .shade :focus-visible, .hero :focus-visible, .site-nav :focus-visible, .menu :focus-visible { outline-color: var(--petal); }
 .wrap {
   padding-left: calc(max(16px, env(safe-area-inset-left, 0px)) + var(--pad));
@@ -94,76 +115,130 @@ a { color: inherit; }
 .inner { max-width: 1320px; margin-inline: auto; }
 .skip { position: absolute; left: 16px; top: -60px; z-index: 100; background: var(--cream); color: var(--bark); padding: 10px 14px; border-radius: 6px; }
 .skip:focus { top: 12px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
 /* ---------- type ---------- */
 .display {
   margin: 0;
   font-family: var(--f-display); font-weight: var(--w-display);
-  font-size: clamp(44px, 6.4vw, 96px);
-  line-height: .95; letter-spacing: -.02em;
+  font-size: clamp(46px, 6.6vw, 100px);
+  line-height: .94;
   text-wrap: balance;
 }
-.display em { font-style: normal; color: var(--petal-deep); }
+.display em { color: var(--petal-deep); }
 .shade .display em { color: var(--petal); }
-.lead { margin: 0; font-size: clamp(17px, 1.35vw, 20px); line-height: 1.55; color: var(--ink-2); max-width: 46ch; text-wrap: pretty; }
+.lead { margin: 0; font-size: clamp(18px, 1.4vw, 21px); line-height: 1.55; color: var(--ink-2); max-width: 44ch; text-wrap: pretty; }
 .shade .lead { color: var(--cream-2); }
-.data { font-family: var(--f-mono); font-size: 13px; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.data { font-family: var(--f-mono); font-size: 12.5px; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+.sec-head { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: 28px 64px; align-items: end; margin-bottom: clamp(48px, 6vw, 96px); }
+.sec-head .lead { justify-self: end; }
 
 /* ---------- buttons ---------- */
 .btn {
-  display: inline-flex; align-items: center; gap: 10px;
+  position: relative; overflow: hidden; isolation: isolate;
+  display: inline-flex; align-items: center; gap: 12px;
   font: 600 15px/1 var(--f-body); text-decoration: none; letter-spacing: .005em;
-  padding: 16px 22px; border-radius: 999px; border: 1px solid transparent; cursor: pointer;
-  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease, transform 160ms var(--ease-out);
+  padding: 17px 24px; border-radius: 999px; border: 1px solid transparent; cursor: pointer;
+  transition: color 300ms ease, border-color 300ms ease, transform 160ms var(--ease-out);
+}
+/* the fill rises from below the label on hover, like water in a can */
+.btn::before {
+  content: ""; position: absolute; inset: -1px; z-index: -1; border-radius: inherit;
+  background: var(--btn-fill, var(--moss-deep));
+  transform: translateY(102%); transition: transform 520ms var(--ease-out);
 }
 .btn:active { transform: scale(.97); }
-.btn svg { transition: transform 240ms var(--ease-out); }
-.btn-solid { background: var(--ink); color: var(--lichen); }
-.btn-line { border-color: rgba(28,32,21,.35); color: var(--ink); }
-.shade .btn-solid, .hero .btn-solid { background: var(--cream); color: var(--bark); }
-.shade .btn-line, .hero .btn-line { border-color: rgba(243,240,230,.42); color: var(--cream); }
+.btn svg { transition: transform 300ms var(--ease-out); }
+.btn-solid { background: var(--ink); color: var(--lichen); --btn-fill: var(--moss-deep); }
+.btn-line { border-color: var(--rule-strong); color: var(--ink); --btn-fill: var(--ink); }
+.shade .btn-solid, .hero .btn-solid, .site-nav .btn-solid { background: var(--cream); color: var(--bark); --btn-fill: var(--moss); }
+.shade .btn-line, .hero .btn-line { border-color: rgba(243,240,230,.42); color: var(--cream); --btn-fill: var(--cream); }
 @media (hover: hover) and (pointer: fine) {
-  .btn-solid:hover { background: var(--moss-deep); color: var(--lichen); }
-  .shade .btn-solid:hover, .hero .btn-solid:hover { background: var(--moss); color: var(--bark); }
-  .btn-line:hover { border-color: currentColor; }
-  .btn:hover svg { transform: translateX(3px); }
+  .btn:hover::before { transform: none; }
+  .btn-line:hover { color: var(--lichen); border-color: var(--ink); }
+  .shade .btn-line:hover, .hero .btn-line:hover { color: var(--bark); border-color: var(--cream); }
+  .btn:hover svg { transform: translateX(4px); }
 }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+
+/* ---------- intro: the garden gate lifts ---------- */
+.intro {
+  position: fixed; inset: 0; z-index: 80; background: var(--bark); color: var(--cream);
+  display: grid; place-items: center;
+  transition: transform 1150ms var(--ease-curtain);
+  animation: introAuto 900ms var(--ease-curtain) 3.4s forwards; /* failsafe if the script never runs */
+}
+.intro::after { /* the curtain's soft lower edge, so it leaves as a curve rather than a ruler line */
+  content: ""; position: absolute; left: -10%; right: -10%; top: calc(100% - 1px); height: 18vh;
+  background: inherit; border-radius: 0 0 50% 50%;
+  transform-origin: 50% 0; transition: transform 1150ms var(--ease-curtain);
+}
+.intro.done { animation: none; transform: translateY(calc(-100% - 18vh)); }
+.intro.done::after { transform: scaleY(.25); }
+.intro.gone { display: none; }
+@keyframes introAuto { to { transform: translateY(calc(-100% - 18vh)); visibility: hidden; } }
+.intro-inner { display: grid; justify-items: center; gap: 18px; padding: 24px; }
+.intro-mark { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(46px, 9vw, 120px); line-height: 1; letter-spacing: -.04em; display: flex; overflow: hidden; padding-bottom: .08em; }
+.intro-mark span { display: inline-block; transform: translateY(105%); animation: rise 1000ms var(--ease-out) forwards; animation-delay: calc(120ms + var(--c) * 45ms); }
+.intro-meta { margin: 0; color: var(--cream-2); opacity: 0; animation: fadeIn 700ms ease 650ms forwards; }
+.intro-bar { width: min(220px, 50vw); height: 1px; background: var(--cream-rule); display: block; overflow: hidden; }
+.intro-bar b { display: block; height: 100%; background: var(--moss); transform-origin: 0 50%; transform: scaleX(var(--load, 0)); transition: transform 500ms var(--ease-out); }
+@keyframes rise { to { transform: none; } }
+@keyframes fadeIn { to { opacity: 1; } }
 
 /* ---------- site nav ---------- */
 .site-nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 40;
   padding-top: env(safe-area-inset-top, 0px);
   color: var(--cream);
-  transition: transform 320ms var(--ease-move), background-color 300ms ease, color 300ms ease, border-color 300ms ease;
-  border-bottom: 1px solid transparent;
+  transition: transform 520ms var(--ease-out);
+  pointer-events: none;
 }
-.site-nav .bar { display: flex; align-items: center; gap: 28px; height: var(--nav-h); }
-.site-nav.solid { background: var(--bark); border-bottom-color: var(--cream-rule); }
-.site-nav.away { transform: translateY(-100%); }
-.wordmark { font-family: var(--f-display); font-weight: 500; font-size: 27px; letter-spacing: .005em; text-decoration: none; margin-right: auto; line-height: 1; }
-.links { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; }
+.site-nav .bar {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: 22px; height: var(--nav-h);
+  margin-inline: auto; max-width: 100%;
+  border-radius: 0; background: rgba(var(--scrim), 0);
+  transition: max-width 700ms var(--ease-out), height 500ms var(--ease-out), margin 500ms var(--ease-out), border-radius 500ms var(--ease-out), background-color 400ms ease, padding 500ms var(--ease-out), box-shadow 400ms ease;
+}
+/* past the hero the bar gathers into a floating capsule */
+.site-nav.solid .bar {
+  max-width: min(1180px, calc(100% - 24px)); height: 60px; margin-top: 10px; border-radius: 999px;
+  background: rgba(22, 23, 15, .82); -webkit-backdrop-filter: blur(16px) saturate(1.2); backdrop-filter: blur(16px) saturate(1.2);
+  padding-left: 26px; padding-right: 8px;
+  box-shadow: 0 10px 30px rgba(var(--shadow), .22), inset 0 0 0 1px rgba(243,240,230,.08);
+}
+.site-nav.away { transform: translateY(-120%); }
+.wordmark { display: inline-flex; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 500; font-size: 26px; letter-spacing: -.01em; text-decoration: none; margin-right: auto; line-height: 1; }
+.wordmark svg { color: var(--moss); flex: none; }
+.links { position: relative; display: flex; gap: 2px; list-style: none; margin: 0; padding: 4px; border-radius: 999px; }
 .links a {
+  position: relative; z-index: 1; display: block;
   font-size: 14.5px; font-weight: 500; text-decoration: none; color: var(--cream-2);
-  padding-block: 6px; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;
-  transition: color 200ms ease, background-size 260ms var(--ease-out);
+  padding: 9px 15px; border-radius: 999px;
+  transition: color 250ms ease;
 }
-.links a:hover, .links a[aria-current="true"] { color: var(--cream); background-size: 100% 1px; }
-.nav-cta { padding: 11px 18px; font-size: 14px; }
+.links a:hover, .links a[aria-current="true"] { color: var(--cream); }
+.links .pill { /* slides under the hovered or current link */
+  position: absolute; z-index: 0; top: 4px; height: calc(100% - 8px); left: 0; width: 0; border-radius: 999px;
+  background: rgba(243, 240, 230, .12); opacity: 0;
+  transition: transform 480ms var(--ease-out), width 480ms var(--ease-out), opacity 250ms ease;
+}
+.nav-cta { padding: 13px 20px; font-size: 14px; }
 .theme-btn {
-  display: inline-grid; place-items: center; width: 42px; height: 42px; border-radius: 50%;
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; flex: none;
   background: none; border: 1px solid rgba(243,240,230,.3); color: var(--cream); cursor: pointer;
   transition: border-color 200ms ease, transform 160ms var(--ease-out);
 }
 .theme-btn:active { transform: scale(.94); }
-.theme-btn svg { grid-area: 1 / 1; transition: opacity 200ms ease, transform 300ms var(--ease-out); }
+.theme-btn svg { grid-area: 1 / 1; transition: opacity 200ms ease, transform 400ms var(--ease-out); }
 .theme-btn .i-sun { opacity: 0; transform: rotate(-60deg) scale(.7); }
 .theme-btn.is-dark .i-sun { opacity: 1; transform: none; }
 .theme-btn.is-dark .i-moon { opacity: 0; transform: rotate(60deg) scale(.7); }
 @media (hover: hover) and (pointer: fine) { .theme-btn:hover { border-color: var(--cream); } }
-.site-nav .nav-cta { background: var(--cream); color: var(--bark); }
 .menu-btn {
   display: none; align-items: center; gap: 10px; background: none; border: 1px solid rgba(243,240,230,.4);
-  color: var(--cream); font: 600 14px/1 var(--f-body); padding: 11px 16px; border-radius: 999px; cursor: pointer;
+  color: var(--cream); font: 600 14px/1 var(--f-body); padding: 13px 18px; border-radius: 999px; cursor: pointer; min-height: 44px;
 }
 .menu-btn:active { transform: scale(.97); }
 .menu-btn i { display: grid; gap: 4px; }
@@ -176,18 +251,19 @@ a { color: inherit; }
   padding-top: env(safe-area-inset-top, 0px); padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
   clip-path: circle(0px at var(--mx, 90%) var(--my, 36px));
   visibility: hidden;
-  transition: clip-path 520ms var(--ease-move), visibility 0s linear 520ms;
+  transition: clip-path 620ms var(--ease-move), visibility 0s linear 620ms;
 }
-.menu.open { clip-path: circle(150vmax at var(--mx, 90%) var(--my, 36px)); visibility: visible; transition: clip-path 620ms var(--ease-move), visibility 0s; }
+.menu.open { clip-path: circle(150vmax at var(--mx, 90%) var(--my, 36px)); visibility: visible; transition: clip-path 760ms var(--ease-move), visibility 0s; }
 .menu .bar { display: flex; align-items: center; justify-content: space-between; height: var(--nav-h); }
 .menu nav { align-self: center; }
-.menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.menu ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: m; }
 .menu ul a {
-  display: block; text-decoration: none; font-family: var(--f-display); font-weight: var(--w-display);
-  font-size: clamp(44px, 12vw, 72px); line-height: 1.05; padding-block: 4px;
+  display: flex; align-items: baseline; gap: 16px; text-decoration: none; font-family: var(--f-display); font-weight: var(--w-display);
+  font-size: clamp(44px, 12vw, 76px); line-height: 1.04; padding-block: 4px; overflow: hidden;
 }
-.menu ul a span { display: inline-block; transform: translateY(-40%); opacity: 0; transition: transform 600ms var(--ease-out), opacity 400ms ease; }
-.menu.open ul a span { transform: none; opacity: 1; }
+.menu ul a span { display: inline-block; transform: translateY(105%); transition: transform 800ms var(--ease-out); }
+.menu ul a em { color: var(--moss); }
+.menu.open ul a span { transform: none; }
 .menu.open li:nth-child(2) a span { transition-delay: 50ms; }
 .menu.open li:nth-child(3) a span { transition-delay: 100ms; }
 .menu.open li:nth-child(4) a span { transition-delay: 150ms; }
@@ -195,18 +271,19 @@ a { color: inherit; }
 .menu.open li:nth-child(6) a span { transition-delay: 250ms; }
 .menu .foot { display: flex; flex-wrap: wrap; gap: 12px 24px; justify-content: space-between; align-items: center; color: var(--cream-2); }
 
-@media (max-width: 960px) {
+@media (max-width: 1020px) {
   .links, .nav-cta { display: none; }
   .menu-btn { display: inline-flex; }
 }
 
 /* ---------- hero ---------- */
 .hero {
-  position: relative; isolation: isolate;
+  position: relative; z-index: 1; isolation: isolate;
   min-height: max(620px, 100svh);
   display: grid; grid-template-rows: var(--nav-h) auto 1fr auto;
   overflow: hidden; touch-action: pan-y;
   background: var(--bark); color: var(--cream);
+  will-change: transform;
 }
 .bare, .garden { position: absolute; inset: 0; width: 100%; height: 100%; max-width: 100%; z-index: -3; }
 .bare { object-fit: cover; object-position: var(--pan-x, 50%) 45%; }
@@ -218,166 +295,404 @@ a { color: inherit; }
     linear-gradient(180deg, rgba(var(--scrim), .62) 0%, rgba(var(--scrim), .28) 32%, rgba(var(--scrim), 0) 46%),
     linear-gradient(0deg, rgba(var(--scrim), .82) 0%, rgba(var(--scrim), .3) 20%, rgba(var(--scrim), 0) 30%);
 }
+.hero-veil { position: absolute; inset: 0; z-index: -1; background: var(--bark); opacity: 0; pointer-events: none; }
 .hero-top { padding-block: clamp(12px, 3vh, 40px) 0; text-shadow: 0 1px 24px rgba(var(--scrim), .5); }
 .hero h1 {
   margin: 0; font-family: var(--f-display); font-weight: var(--w-display);
-  font-size: clamp(52px, min(8.6vw, 15vh), 136px);
-  line-height: .9; letter-spacing: -.025em; text-wrap: balance;
+  font-size: clamp(54px, min(9vw, 15.5vh), 144px);
+  line-height: .9; text-wrap: balance; max-width: 12ch;
 }
 .hero h1 em { font-style: normal; color: var(--petal); }
 .hero-bottom {
   display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px 32px;
-  padding-block: 0 clamp(22px, 3vw, 36px);
+  padding-block: 0 clamp(24px, 3.4vw, 44px);
   text-shadow: 0 1px 16px rgba(var(--scrim), .6);
 }
-.hero-act { display: grid; gap: 18px; min-width: 0; }
-.hero .lead { color: var(--cream-2); max-width: 50ch; }
+.hero-act { display: grid; gap: 20px; min-width: 0; }
+.hero .lead { color: var(--cream-2); max-width: 46ch; }
 .ctas { display: flex; flex-wrap: wrap; gap: 10px; }
 .hero .btn { text-shadow: none; }
-.hero-side { display: grid; gap: 10px; justify-items: end; text-align: right; }
-.today { color: var(--cream); }
+.hero-side { display: grid; gap: 12px; justify-items: end; text-align: right; }
+.today { color: var(--cream); display: inline-flex; align-items: center; gap: 10px; }
 .today b { font-weight: 500; color: var(--moss); }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--moss); box-shadow: 0 0 0 0 rgba(205,212,127,.6); animation: breathe 2.4s ease-out infinite; flex: none; }
+.live-dot.closed { background: var(--petal); animation: none; }
+@keyframes breathe { 70% { box-shadow: 0 0 0 8px rgba(205,212,127,0); } 100% { box-shadow: 0 0 0 0 rgba(205,212,127,0); } }
 .hint { margin: 0; display: inline-flex; align-items: center; gap: 10px; color: var(--cream-2); transition: opacity .8s; }
 .hint.gone { opacity: 0; }
 .hint i { width: 26px; height: 1px; background: currentColor; display: block; }
 
-/* ---------- ticker: what is in flower this week ---------- */
-.ticker { background: var(--bark); color: var(--cream-2); border-top: 1px solid var(--cream-rule); overflow: hidden; }
-.ticker-track { display: flex; width: max-content; animation: tick 70s linear infinite; }
-.ticker:hover .ticker-track { animation-play-state: paused; }
-.ticker ul { display: flex; list-style: none; margin: 0; padding: 18px 0; }
-.ticker li { display: flex; align-items: center; gap: 20px; padding-right: 20px; white-space: nowrap; font-family: var(--f-display); font-size: 22px; color: var(--cream); }
-.ticker li::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--moss); }
-.ticker .data { color: var(--moss); font-style: normal; font-size: 12px; }
-@keyframes tick { to { transform: translateX(-50%); } }
+/* ---------- the reading sheet slides over the hero ---------- */
+main {
+  position: relative; z-index: 2; display: block;
+  background: var(--lichen); color: var(--ink);
+  border-radius: var(--sheet-r) var(--sheet-r) 0 0; margin-top: calc(-1 * var(--sheet-r));
+}
 
-/* ---------- image placeholders ---------- */
-.ph {
-  position: relative; overflow: hidden; margin: 0;
-  background: var(--bark-2); color: var(--cream);
-  border-radius: 4px; max-width: 100%;
+/* ---------- picture frames ---------- */
+.frame {
+  position: relative; margin: 0; overflow: hidden; max-width: 100%;
+  background: var(--bark-2); border-radius: 6px;
 }
-.ph-img {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(60% 50% at var(--x1, 30%) var(--y1, 40%), rgba(205, 212, 127, .30), transparent 70%),
-    radial-gradient(50% 60% at var(--x2, 75%) var(--y2, 65%), rgba(241, 199, 208, .16), transparent 70%),
-    radial-gradient(80% 70% at 50% 110%, rgba(86, 98, 26, .55), transparent 70%),
-    linear-gradient(160deg, #2b2f1f, #191b12);
-  transform-origin: 50% 50%;
+.frame-in { position: absolute; inset: 0; overflow: hidden; }
+.frame img { width: 100%; height: 100%; object-fit: cover; will-change: transform; transform: scale(1.12); }
+.frame .stand { filter: var(--tone, none); }
+.r-3x2 { aspect-ratio: 3 / 2; } .r-4x5 { aspect-ratio: 4 / 5; } .r-1x1 { aspect-ratio: 1; } .r-5x4 { aspect-ratio: 5 / 4; }
+.arch { border-radius: 50% 50% 6px 6px / 40% 40% 6px 6px; }
+.arch-line { position: relative; }
+.arch-line::before { /* a hairline arch drawn just outside the photo, like a doorway's stone surround */
+  content: ""; position: absolute; inset: -12px; z-index: 0; pointer-events: none;
+  border: 1px solid var(--rule-strong); border-bottom: 0;
+  border-radius: 50% 50% 0 0 / 40% 40% 0 0;
+  transition: opacity 1200ms ease 600ms, transform 1400ms var(--ease-out) 400ms;
 }
-.ph-img::after {
-  content: ""; position: absolute; inset: 0; opacity: .5;
-  background-image: repeating-linear-gradient(135deg, rgba(243,240,230,.05) 0 1px, transparent 1px 14px);
+.shade .arch-line::before { border-color: var(--cream-rule); }
+/* a small chip that names the photo a slot is waiting for; it shows on hover so the page reads as finished */
+.chip {
+  position: absolute; z-index: 3; top: 14px; left: 14px; right: auto; max-width: calc(100% - 28px);
+  display: inline-flex; align-items: center; gap: 8px; padding: 7px 11px; border-radius: 999px;
+  background: rgba(22, 23, 15, .72); color: var(--cream); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .03em; line-height: 1.2;
+  opacity: 0; transform: translateY(-4px); transition: opacity 250ms ease, transform 350ms var(--ease-out);
+  pointer-events: none;
 }
-.ph figcaption {
-  position: absolute; left: 14px; right: 14px; bottom: 12px;
-  display: flex; align-items: flex-start; gap: 10px;
-  font-size: 13px; line-height: 1.4; color: var(--cream);
+.chip i { width: 6px; height: 6px; border-radius: 50%; background: var(--petal); flex: none; }
+.arch .chip { top: auto; bottom: 14px; }
+.has-photo .chip { display: none; }
+@media (hover: hover) { figure:hover > .chip, .frame-wrap:hover .chip { opacity: 1; transform: none; } }
+.show-chips .chip { opacity: 1; transform: none; }
+
+/* ---------- 0. the opening statement ---------- */
+.about { padding-block: clamp(112px, 14vw, 200px) var(--section); }
+.manifesto {
+  margin: 0; font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(32px, 4.3vw, 66px); line-height: 1.08; max-width: 22ch; text-wrap: pretty;
 }
-.ph figcaption svg { flex: none; margin-top: 1px; color: var(--moss); }
-.ph figcaption > span { min-width: 0; overflow-wrap: anywhere; }
-.ph figcaption small { display: block; font-family: var(--f-mono); font-size: 11px; color: var(--cream-2); letter-spacing: .03em; margin-top: 2px; }
-.r-3x2 { aspect-ratio: 3 / 2; } .r-4x5 { aspect-ratio: 4 / 5; } .r-1x1 { aspect-ratio: 1; } .r-16x9 { aspect-ratio: 16 / 9; } .r-5x4 { aspect-ratio: 5 / 4; }
+.manifesto em { color: var(--petal-deep); }
+.inlay {
+  display: inline-block; vertical-align: -.08em; width: 2.1em; height: .8em; margin-inline: .08em;
+  border-radius: 999px; overflow: hidden; background: var(--bark-2);
+  transform: scale(var(--inlay, 1)); transition: transform 900ms var(--ease-out);
+}
+.inlay img { width: 100%; height: 100%; object-fit: cover; }
+.about-foot { margin-top: clamp(40px, 5vw, 72px); display: flex; flex-wrap: wrap; gap: 16px 40px; align-items: center; justify-content: space-between; color: var(--ink-2); }
+.about-foot .data { color: var(--moss-deep); }
+
+/* ---------- section break: a stem drawn as you scroll ---------- */
+.stem { position: relative; display: grid; justify-items: center; gap: 4px; padding-block: clamp(24px, 4vw, 56px); color: var(--moss-deep); overflow: hidden; }
+.stem svg { width: 100%; height: clamp(70px, 9vw, 120px); overflow: visible; }
+.stem .vine { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; }
+.stem .leaf { fill: currentColor; opacity: .85; transform-box: fill-box; transform: scale(var(--s, 0)); }
+.stem .bud { fill: var(--petal-deep); transform-box: fill-box; transform-origin: center; transform: scale(var(--b, 0)); }
+.stem .data { color: var(--ink-2); text-align: center; padding-inline: 16px; }
+.shade .stem { color: var(--moss); }
+.shade .stem .data { color: var(--cream-2); }
 
 /* ---------- 1. seasons ---------- */
-.seasons { padding-block: var(--section); }
-.seasons .inner { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
-.seasons-head { display: grid; gap: 28px; position: sticky; top: calc(var(--nav-h) + 32px); }
-.months { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-.months button {
-  width: 100%; display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: baseline; gap: 16px;
-  padding: 16px 4px; background: none; border: 0; border-bottom: 1px solid var(--rule);
-  font: inherit; color: var(--ink-2); text-align: left; cursor: pointer;
-  transition: color 200ms ease, background-color 200ms ease;
+.seasons { padding-block: 0 var(--section); }
+.seasons-body { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(40px, 7vw, 120px); align-items: start; }
+.season-frame-wrap { position: sticky; top: calc(var(--nav-h) + 28px); padding: 12px 12px 0; }
+.season-frame { aspect-ratio: 4 / 5; }
+.season-frame .layer { position: absolute; inset: 0; overflow: hidden; }
+.season-frame .layer.enter { animation: layerIn 1000ms var(--ease-curtain) forwards; }
+.season-frame .layer.enter img { animation: layerImg 1400ms var(--ease-out) forwards; }
+@keyframes layerIn { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes layerImg { from { transform: scale(1.3); } to { transform: scale(1.06); } }
+.season-frame .layer img { transform: scale(1.06); }
+.season-cap {
+  position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding: 72px 24px 22px;
+  background: linear-gradient(0deg, rgba(var(--scrim), .72), rgba(var(--scrim), 0));
+  color: var(--cream); display: grid; gap: 4px;
 }
+.season-cap .data { color: var(--moss); }
+.season-cap b { font-family: var(--f-display); font-weight: 400; font-size: clamp(24px, 2.2vw, 32px); line-height: 1.1; letter-spacing: -.02em; }
+.season-cap span:last-child { color: var(--cream-2); font-size: 15px; }
+.season-cap > * { transition: transform 700ms var(--ease-out), opacity 500ms ease; }
+.season-cap.swap > * { transform: translateY(10px); opacity: 0; transition: none; }
+.months { list-style: none; margin: 0; padding: 0; }
+.months li { position: relative; }
+.months li::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--rule); transform-origin: 0 50%; transition: transform 1100ms var(--ease-out); transition-delay: inherit; }
+.months li:first-child::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--rule); }
+.months button {
+  position: relative; isolation: isolate; overflow: hidden;
+  width: 100%; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto 20px; align-items: baseline; gap: 18px;
+  padding: 18px 10px; background: none; border: 0;
+  font: inherit; color: var(--ink-2); text-align: left; cursor: pointer;
+}
+.months button::before { /* a wash that sweeps in behind the chosen month */
+  content: ""; position: absolute; inset: 0; z-index: -1; background: var(--moss-wash);
+  transform: scaleX(0); transform-origin: 0 50%; transition: transform 700ms var(--ease-out);
+}
+.months button[aria-pressed="true"]::before { transform: none; }
 .months .data { color: var(--moss-deep); font-weight: 500; }
-.months .what { font-family: var(--f-display); font-size: clamp(22px, 2vw, 28px); line-height: 1.15; color: var(--ink); transition: transform 260ms var(--ease-out); }
-.months .where { font-size: 14px; color: var(--ink-2); }
-.months button[aria-pressed="true"] { background: var(--lichen-2); }
-.months button[aria-pressed="true"] .what { color: var(--petal-deep); }
-@media (hover: hover) and (pointer: fine) { .months button:hover .what { transform: translateX(6px); } }
-.month-ph { margin-top: 12px; }
+.months .what { font-family: var(--f-display); font-size: clamp(22px, 2vw, 29px); line-height: 1.15; color: var(--ink); letter-spacing: -.015em; transition: transform 500ms var(--ease-out), color 300ms ease; }
+.months .where { font-size: 14.5px; color: var(--ink-2); text-align: right; }
+.months .arr { align-self: center; color: var(--petal-deep); opacity: 0; transform: translateX(-8px); transition: opacity 300ms ease, transform 500ms var(--ease-out); }
+.months button[aria-pressed="true"] .what { color: var(--petal-deep); transform: translateX(8px); }
+.months button[aria-pressed="true"] .arr { opacity: 1; transform: none; }
+@media (hover: hover) and (pointer: fine) { .months button:hover .what { transform: translateX(8px); } }
 
 /* ---------- 2. grounds ---------- */
-.grounds { background: var(--lichen-2); padding-block: var(--section); }
-.grounds .inner { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
-.grounds-map { position: sticky; top: calc(var(--nav-h) + 32px); }
-.grounds-copy { display: grid; gap: 28px; }
-.areas { list-style: none; margin: 12px 0 0; padding: 0; counter-reset: none; }
-.areas li { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 20px; padding: 22px 0; }
-.areas li::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--rule); transform-origin: 0 50%; }
-.areas h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.1; }
-.areas p { margin: 0; grid-column: 1 / -1; color: var(--ink-2); max-width: 44ch; }
-.areas .data { color: var(--moss-deep); align-self: center; white-space: nowrap; }
+.grounds { padding-block: 0 var(--section); }
+.grounds-body { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: start; }
+.map-wrap { position: sticky; top: calc(var(--nav-h) + 28px); }
+.map { aspect-ratio: 5 / 4; background: var(--paper); border-radius: 10px; box-shadow: 0 1px 0 var(--rule), 0 30px 60px -30px rgba(var(--shadow), .35); }
+.map.has-photo svg .draw-only { display: none; }
+.map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map .contour { fill: none; stroke: var(--rule); stroke-width: 1; }
+.map .route { fill: none; stroke: var(--rule-strong); stroke-width: 1.4; stroke-dasharray: 2 6; stroke-linecap: round; transition: stroke 300ms ease, stroke-width 300ms ease; }
+.js .map:not(.in) .route { opacity: 0; }
+.map .route { transition: opacity 900ms ease 900ms, stroke 300ms ease, stroke-width 300ms ease; }
+.map .route.on { stroke: var(--petal-deep); stroke-width: 2; stroke-dasharray: none; }
+.map .shape { fill: var(--moss-wash); stroke: var(--moss-deep); stroke-width: 1.1; transition: fill 400ms ease; }
+.map .water { fill: rgba(120, 150, 150, .22); stroke: var(--moss-deep); stroke-width: 1; }
+.map .tree { fill: var(--moss-deep); opacity: .55; }
+.map .ink { fill: none; stroke: var(--moss-deep); stroke-width: 1; stroke-linecap: round; }
+.map .label { font-family: var(--f-display); font-size: 15px; fill: var(--ink); letter-spacing: -.01em; transition: fill 300ms ease; }
+.map .mins { font-family: var(--f-mono); font-size: 9.5px; fill: var(--ink-2); letter-spacing: .06em; }
+.map .area { cursor: pointer; }
+.map .area.on .shape { fill: rgba(169, 69, 95, .16); }
+.map .area.on .label { fill: var(--petal-deep); }
+.map .gate { fill: var(--ink); }
+.map .walker { fill: var(--petal-deep); stroke: var(--paper); stroke-width: 3; opacity: 0; transition: opacity 300ms ease; }
+.map .walker.on { opacity: 1; }
+.js .map:not(.in) .draw { stroke-dashoffset: var(--len); }
+.map .draw { stroke-dasharray: var(--len) var(--len); transition: stroke-dashoffset 2200ms var(--ease-move); transition-delay: var(--dd, 0ms); }
+.js .map:not(.in) .pop { opacity: 0; transform: translateY(6px); }
+.map .pop { transition: opacity 700ms ease, transform 900ms var(--ease-out); transition-delay: var(--dd, 0ms); transform-box: fill-box; }
+.map-pins { display: none; }
+.map.has-photo .map-pins { display: block; position: absolute; inset: 0; pointer-events: none; }
+.map.has-photo .route:not(.on) { opacity: 0; }
+.map.has-photo .route.on { stroke: var(--petal-deep); stroke-width: 3; filter: drop-shadow(0 1px 0 rgba(255,255,255,.7)); }
+.map.has-photo .frame-in img { transform: none; filter: var(--map-photo, none); }
+.pin {
+  position: absolute; left: var(--x); top: var(--y); transform: translate(-50%, -50%);
+  pointer-events: auto; cursor: pointer; white-space: nowrap;
+  padding: 6px 11px; border-radius: 999px; background: rgba(250, 247, 236, .92); color: #2a2d1f;
+  font-family: var(--f-display); font-size: 13.5px; letter-spacing: -.01em; line-height: 1;
+  box-shadow: 0 2px 10px rgba(40, 36, 20, .18), inset 0 0 0 1px rgba(40, 36, 20, .12);
+  transition: background-color 300ms ease, color 300ms ease, transform 400ms var(--ease-out);
+}
+.pin.end { transform: translate(-100%, -50%); }
+.pin.on { background: #a9455f; color: #fbf3ef; }
+.pin.gate-pin { background: #2a2d1f; color: #f3f0e6; font-family: var(--f-mono); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; cursor: default; }
+.js .map.has-photo:not(.in) .pin { opacity: 0; transform: translate(-50%, -30%); }
+.js .map.has-photo:not(.in) .pin.end { transform: translate(-100%, -30%); }
+.map.has-photo .pin { transition: opacity 700ms ease, transform 900ms var(--ease-out), background-color 300ms ease, color 300ms ease; }
+.map.has-photo.in .pin:nth-child(2) { transition-delay: 150ms; } .map.has-photo.in .pin:nth-child(3) { transition-delay: 250ms; }
+.map.has-photo.in .pin:nth-child(4) { transition-delay: 350ms; } .map.has-photo.in .pin:nth-child(5) { transition-delay: 450ms; }
+.map.has-photo.in .pin:nth-child(6) { transition-delay: 550ms; } .map.has-photo.in .pin:nth-child(7) { transition-delay: 650ms; }
+@media (max-width: 600px) { .pin { font-size: 11.5px; padding: 5px 8px; } }
+.map-key { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 16px; color: var(--ink-2); font-size: 14px; }
+.map-key span { display: inline-flex; align-items: center; gap: 8px; }
+.map-key i { width: 18px; height: 0; border-top: 1.6px dotted var(--rule-strong); }
+.map-key i.on { border-top: 2px solid var(--petal-deep); }
+.areas { list-style: none; margin: 0; padding: 0; }
+.areas li { position: relative; }
+.areas li::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--rule); transform-origin: 0 50%; transition: transform 1100ms var(--ease-out); transition-delay: inherit; }
+.areas li:first-child::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--rule); }
+.area-btn {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 20px; align-items: baseline;
+  padding: 24px 0; background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.area-name { font-family: var(--f-display); font-weight: 400; font-size: clamp(27px, 2.5vw, 36px); line-height: 1.08; letter-spacing: -.02em; transition: color 300ms ease, transform 500ms var(--ease-out); }
+.area-btn .data { color: var(--moss-deep); white-space: nowrap; display: inline-flex; align-items: center; gap: 10px; }
+.area-btn .data i { display: block; width: var(--walk, 20px); height: 1px; background: currentColor; transform-origin: 0 50%; transform: scaleX(.3); transition: transform 700ms var(--ease-out); }
+.area-btn p { margin: 0; grid-column: 1 / -1; color: var(--ink-2); max-width: 44ch; font-size: 16px; }
+.area-btn[aria-pressed="true"] .area-name { color: var(--petal-deep); transform: translateX(6px); }
+.area-btn[aria-pressed="true"] .data i { transform: none; }
+@media (hover: hover) and (pointer: fine) { .area-btn:hover .area-name { transform: translateX(6px); } }
 
 /* ---------- 3. interlude ---------- */
-.interlude { background: var(--lichen-2); height: 190vh; position: relative; }
-.interlude-stick { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; overflow: hidden; }
-.interlude .ph { position: absolute; inset: 0; border-radius: 0; transform-origin: 50% 50%; }
-.interlude .ph figcaption { left: auto; right: max(16px, env(safe-area-inset-right, 0px)); bottom: 20px; max-width: 280px; }
+.interlude { height: 200vh; position: relative; }
+.interlude-stick { position: sticky; top: 0; height: 100vh; height: 100svh; display: grid; place-items: center; overflow: hidden; }
+.interlude .frame { position: absolute; inset: 0; border-radius: 0; background: var(--bark); }
+.interlude .frame img { transform: none; }
+.interlude .frame::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 60% at 50% 50%, rgba(var(--scrim), .55), rgba(var(--scrim), .2)); pointer-events: none; }
+.inter-copy { position: relative; z-index: 2; display: grid; justify-items: center; gap: 26px; padding-inline: 20px; text-align: center; }
 .interlude-quote {
-  position: relative; z-index: 1; margin: 0; text-align: center; color: var(--cream);
-  font-family: var(--f-display); font-weight: var(--w-display); font-size: clamp(38px, 5.6vw, 84px); line-height: 1.02; letter-spacing: -.02em;
-  max-width: 16ch; text-wrap: balance; text-shadow: 0 2px 30px rgba(var(--scrim), .5);
+  margin: 0; color: var(--cream);
+  font-family: var(--f-display); font-weight: var(--w-display); font-size: clamp(40px, 6vw, 92px); line-height: 1;
+  max-width: 15ch; text-wrap: balance; text-shadow: 0 2px 30px rgba(var(--scrim), .5);
 }
 .interlude-quote em { color: var(--petal); }
-.interlude-quote .data { display: block; margin-top: 24px; font-size: 13px; letter-spacing: .04em; color: var(--moss); text-shadow: none; }
+.inter-copy .data { color: var(--moss); padding: 8px 14px; border-radius: 999px; background: rgba(var(--scrim), .55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.interlude .chip { top: auto; bottom: 20px; left: auto; right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* ---------- section break: what is in flower this week ---------- */
+.mq { overflow: hidden; padding-block: clamp(40px, 6vw, 80px); border-bottom: 1px solid var(--rule); }
+.mq-head { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 22px; color: var(--ink-2); }
+.mq-head .data { color: var(--moss-deep); }
+.mq-track { display: flex; width: max-content; will-change: transform; }
+.mq ul { display: flex; list-style: none; margin: 0; padding: 0; }
+.mq li {
+  display: flex; align-items: center; gap: clamp(18px, 2vw, 30px); padding-right: clamp(18px, 2vw, 30px); white-space: nowrap;
+  font-family: var(--f-display); font-size: clamp(40px, 5.6vw, 84px); line-height: 1.1; letter-spacing: -.03em; color: var(--ink);
+}
+.mq li span { transform: skewX(var(--skew, 0deg)); display: inline-block; }
+.mq li:nth-child(even) span { color: var(--petal-deep); }
+.mq .thumb { width: 1.5em; height: .9em; border-radius: 999px; overflow: hidden; flex: none; background: var(--bark-2); }
+.mq .thumb img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ---------- 4. visit ---------- */
 .visit { padding-block: var(--section); }
-.visit-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 64px; align-items: end; margin-bottom: clamp(48px, 6vw, 88px); }
-.visit-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 4fr); gap: clamp(32px, 4vw, 64px); align-items: start; }
-.facts h3 { margin: 0 0 14px; font-family: var(--f-display); font-weight: 400; font-size: 28px; }
-.facts dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; }
-.facts dt, .facts dd { padding: 12px 0; border-top: 1px solid var(--rule); margin: 0; }
-.facts dd { text-align: right; font-family: var(--f-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
-.facts p { margin: 0 0 12px; color: var(--ink-2); }
-.facts + .facts { }
-.visit-note { margin-top: 20px; font-size: 14px; color: var(--ink-2); }
+.visit-stage {
+  position: relative; display: grid; align-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 400px) minmax(0, 1fr);
+  grid-template-areas: "a gate b" "c gate d";
+  gap: clamp(28px, 4vw, 64px) clamp(32px, 6vw, 110px);
+  margin-bottom: clamp(72px, 9vw, 140px);
+}
+.visit-stage .gate-wrap { grid-area: gate; padding: 12px 12px 0; }
+.vfact { position: relative; z-index: 1; display: grid; gap: 6px; max-width: 250px; }
+.vfact:nth-of-type(1) { grid-area: a; justify-self: end; text-align: right; align-self: end; }
+.vfact:nth-of-type(2) { grid-area: b; align-self: end; }
+.vfact:nth-of-type(3) { grid-area: c; justify-self: end; text-align: right; align-self: start; }
+.vfact:nth-of-type(4) { grid-area: d; align-self: start; }
+.vfact b { font-family: var(--f-display); font-weight: 400; font-size: clamp(46px, 4.6vw, 72px); line-height: 1; letter-spacing: -.035em; font-variant-numeric: tabular-nums; }
+.vfact span { color: var(--ink-2); font-size: 15.5px; line-height: 1.45; }
+.links-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.links-svg path { fill: none; stroke: var(--rule-strong); stroke-width: 1; stroke-dasharray: var(--len) var(--len); stroke-dashoffset: var(--len); transition: stroke-dashoffset 1600ms var(--ease-move); transition-delay: var(--dd, 0ms); }
+.links-svg circle { fill: var(--moss-deep); opacity: 0; transition: opacity 400ms ease; transition-delay: var(--dd, 0ms); }
+.visit-stage.in .links-svg path { stroke-dashoffset: 0; }
+.visit-stage.in .links-svg circle { opacity: 1; }
+
+.visit-panels { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(20px, 2.4vw, 32px); align-items: stretch; }
+.panel {
+  position: relative; border-radius: 18px; padding: clamp(26px, 3vw, 44px);
+  background: var(--paper); box-shadow: 0 1px 0 var(--rule), 0 40px 80px -48px rgba(var(--shadow), .45);
+  display: grid; gap: 22px; align-content: start;
+}
+.panel h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(30px, 2.8vw, 40px); line-height: 1.05; letter-spacing: -.025em; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 20px; }
+.status { display: inline-flex; align-items: center; gap: 10px; padding: 9px 14px 9px 12px; border-radius: 999px; border: 1px solid var(--rule); font-size: 14.5px; }
+.status .live-dot { background: var(--moss-deep); }
+.status .live-dot.closed { background: var(--petal-deep); }
+.status b { font-weight: 600; }
+.dayline { display: grid; gap: 10px; }
+.dayline-track { position: relative; height: 34px; border-radius: 8px; background: repeating-linear-gradient(90deg, var(--rule) 0 1px, transparent 1px calc(100% / 12)); border: 1px solid var(--rule); overflow: hidden; }
+.dayline-open { position: absolute; top: 0; bottom: 0; left: var(--o0); width: calc(var(--o1) - var(--o0)); background: var(--moss-wash); border-inline: 1px solid var(--moss-deep); transform-origin: 0 50%; transition: transform 1400ms var(--ease-out); }
+.js .panel:not(.in) .dayline-open { transform: scaleX(0); }
+.dayline-now { position: absolute; top: -4px; bottom: -4px; left: var(--now); width: 2px; background: var(--petal-deep); border-radius: 2px; }
+.dayline-now::after { content: attr(data-t); position: absolute; top: 50%; left: 8px; transform: translateY(-50%); font-family: var(--f-mono); font-size: 11px; color: var(--petal-deep); white-space: nowrap; }
+.dayline-now.flip::after { left: auto; right: 8px; }
+.dayline-ticks { display: flex; justify-content: space-between; color: var(--ink-2); }
+.hours { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+.hours dt, .hours dd { margin: 0; padding: 14px 0; border-top: 1px solid var(--rule); }
+.hours dd { text-align: right; font-family: var(--f-mono); font-size: 14px; font-variant-numeric: tabular-nums; }
+.hours .cur { color: var(--moss-deep); font-weight: 600; }
+.panel-note { margin: 0; font-size: 15px; color: var(--ink-2); }
+
+/* the ticket: a stub with punched notches and a perforated tear line */
+.ticket {
+  background: var(--ink); color: var(--lichen);
+  --notch: radial-gradient(circle at 0 var(--tear), transparent 13px, #000 13.5px) left / 51% 100% no-repeat, radial-gradient(circle at 100% var(--tear), transparent 13px, #000 13.5px) right / 51% 100% no-repeat;
+  --tear: calc(100% - 150px);
+  -webkit-mask: var(--notch); mask: var(--notch);
+}
+.ticket h3 { color: var(--lichen); }
+.ticket .panel-note { color: color-mix(in srgb, var(--lichen) 72%, transparent); }
+.tix { list-style: none; margin: 0; padding: 0; }
+.tix li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid color-mix(in srgb, var(--lichen) 18%, transparent); }
+.tix .who small { display: block; color: color-mix(in srgb, var(--lichen) 64%, transparent); font-size: 14px; }
+.tix .each { font-family: var(--f-mono); font-size: 13.5px; color: color-mix(in srgb, var(--lichen) 72%, transparent); }
+.step { display: inline-flex; align-items: center; border: 1px solid color-mix(in srgb, var(--lichen) 28%, transparent); border-radius: 999px; }
+.step button { width: 40px; height: 40px; border: 0; background: none; color: inherit; font: 500 18px/1 var(--f-mono); cursor: pointer; border-radius: 50%; transition: background-color 200ms ease; }
+.step button:hover { background: color-mix(in srgb, var(--lichen) 12%, transparent); }
+.step button:disabled { opacity: .3; cursor: default; background: none; }
+.step output { min-width: 22px; text-align: center; font-family: var(--f-mono); font-size: 15px; }
+.tear { position: relative; height: 0; border-top: 1.5px dashed color-mix(in srgb, var(--lichen) 30%, transparent); margin-inline: calc(-1 * clamp(26px, 3vw, 44px)); }
+.ticket-foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; min-height: 92px; }
+.total { display: grid; gap: 2px; }
+.total .data { color: color-mix(in srgb, var(--lichen) 64%, transparent); }
+.total b { font-family: var(--f-display); font-weight: 400; font-size: 46px; line-height: 1; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.ticket .btn-solid { background: var(--lichen); color: var(--ink); --btn-fill: var(--moss); }
+.ticket output.msg { display: block; min-height: 1.4em; font-size: 14.5px; color: var(--moss); }
+:root[data-theme="dark"] .ticket .btn-solid:hover { color: var(--ink); }
 
 /* ---------- 5. membership ---------- */
 .shade { background: var(--bark); color: var(--cream); }
-.membership { padding-block: var(--section); color-scheme: dark; overflow: hidden; }
-.membership .inner { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(40px, 6vw, 96px); align-items: center; }
-.member-copy { display: grid; gap: 30px; }
-.price { display: flex; align-items: baseline; gap: 12px; }
-.price b { font-family: var(--f-display); font-weight: var(--w-display); font-size: clamp(64px, 7vw, 104px); line-height: 1; letter-spacing: -.02em; color: var(--moss); }
-.price span { color: var(--cream-2); }
-.perks { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--cream-rule); }
-.perks li { display: flex; gap: 14px; align-items: baseline; padding: 14px 0; border-bottom: 1px solid var(--cream-rule); }
+.membership { position: relative; padding-block: clamp(80px, 10vw, 150px) var(--section); color-scheme: dark; }
+.dome { /* the dark band rises with a domed top that flattens as it arrives */
+  position: absolute; left: 0; right: 0; bottom: calc(100% - 1px); height: clamp(60px, 10vw, 160px);
+  background: var(--bark); border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  transform-origin: 50% 100%; transform: scaleY(var(--dome, 1)); pointer-events: none;
+}
+.membership .inner { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(48px, 7vw, 120px); align-items: center; }
+.member-copy { display: grid; gap: 34px; }
+.mcard-wrap { perspective: 1200px; max-width: 440px; }
+.mcard {
+  position: relative; aspect-ratio: 1.586; border-radius: 18px; overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,.28), transparent 55%),
+    repeating-radial-gradient(circle at 18% 120%, rgba(22,23,15,.07) 0 1px, transparent 1px 9px),
+    var(--moss);
+  color: var(--bark); padding: 24px 26px; display: grid; grid-template-rows: auto 1fr auto;
+  box-shadow: 0 30px 60px -20px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,255,255,.25);
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transform-style: preserve-3d;
+  transition: transform 700ms var(--ease-out);
+}
+.mcard.live { transition: transform 120ms linear; }
+.mcard-top { display: flex; justify-content: space-between; align-items: center; }
+.mcard-top span { font-family: var(--f-display); font-weight: 500; font-size: 21px; letter-spacing: -.01em; }
+.mcard-price { align-self: center; display: flex; align-items: baseline; gap: 10px; }
+.mcard b { font-family: var(--f-display); font-weight: 400; font-size: clamp(56px, 6vw, 76px); line-height: 1; letter-spacing: -.04em; }
+.mcard-price span { font-size: 15px; }
+.mcard-foot { display: flex; justify-content: space-between; align-items: end; gap: 12px; font-size: 13.5px; line-height: 1.35; }
+.mcard-foot .data { font-size: 11.5px; opacity: .8; }
+.mcard .sheen { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(40% 60% at var(--px, 30%) var(--py, 20%), rgba(255,255,255,.45), transparent 70%); mix-blend-mode: soft-light; opacity: var(--so, .6); }
+.perks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+.perks li { position: relative; display: flex; gap: 14px; align-items: baseline; padding: 16px 0; color: var(--cream); }
+.perks li::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--cream-rule); transform-origin: 0 50%; transition: transform 1100ms var(--ease-out); transition-delay: inherit; }
 .perks svg { flex: none; color: var(--moss); transform: translateY(2px); }
-.member-ph-wrap { position: relative; }
-.member-ph-wrap .small { position: absolute; width: 46%; left: -14%; bottom: -10%; box-shadow: 0 24px 48px rgba(0,0,0,.35); }
+.perks svg path { stroke-dasharray: 16; stroke-dashoffset: 0; transition: stroke-dashoffset 700ms var(--ease-out); transition-delay: inherit; }
+.js .perks:not(.in) svg path { stroke-dashoffset: 16; }
+.member-media { position: relative; padding: 12px 12px 0; }
+.member-media .small { position: absolute; width: 44%; left: -16%; bottom: -12%; z-index: 2; box-shadow: 0 30px 60px rgba(0,0,0,.45); }
 
 /* ---------- 6. journal ---------- */
-.journal { padding-block: var(--section); }
-.journal-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: clamp(40px, 5vw, 72px); }
-.journal-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(32px, 4vw, 64px); }
-.post { display: grid; gap: 16px; text-decoration: none; color: inherit; }
-.post h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 36px); line-height: 1.1; text-wrap: balance; transition: color 200ms ease; }
-.post.big h3 { font-size: clamp(32px, 3.4vw, 52px); }
+.journal { padding-block: 0 var(--section); }
+.journal-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(32px, 5vw, 80px); }
+.post { display: grid; gap: 16px; text-decoration: none; color: inherit; align-content: start; }
+.post h3 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 34px); line-height: 1.1; letter-spacing: -.02em; text-wrap: balance; }
+.post h3 .u { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size 600ms var(--ease-out); padding-bottom: 2px; }
+.post.big h3 { font-size: clamp(34px, 3.6vw, 56px); }
 .post p { margin: 0; color: var(--ink-2); max-width: 52ch; }
 .post .data { color: var(--moss-deep); }
-.post .ph { transition: transform 400ms var(--ease-out); }
+.post .frame img { transition: transform 1200ms var(--ease-out); }
 @media (hover: hover) and (pointer: fine) {
-  .post:hover h3 { color: var(--petal-deep); }
+  .post:hover h3 .u { background-size: 100% 1px; }
+  .post:hover .frame-in { transform: scale(.985); }
+  .post.big .frame { cursor: none; }
 }
-.side-posts { display: grid; gap: 40px; align-content: start; }
-.side-posts .post { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: start; gap: 20px; }
-.side-posts .post > div { display: grid; gap: 10px; }
+.post .frame-in { transition: transform 900ms var(--ease-out); }
+.side-posts { list-style: none; margin: 0; padding: 0; display: grid; align-content: start; }
+.side-posts li { position: relative; }
+.side-posts li + li::before, .side-posts li:first-child::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--rule); }
+.side-posts .post { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; gap: 24px; padding-block: 28px; }
+.side-posts .post > div { display: grid; gap: 12px; }
+.cursor-tag {
+  position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none;
+  width: 92px; height: 92px; margin: -46px 0 0 -46px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--cream); color: var(--bark);
+  font: 600 14px/1 var(--f-body);
+  transform: translate3d(var(--cx, -200px), var(--cy, -200px), 0) scale(var(--cs, 0));
+  transition: transform 500ms var(--ease-out);
+}
 
-/* ---------- footer ---------- */
-.foot-wrap { padding-block: clamp(72px, 9vw, 128px) max(28px, env(safe-area-inset-bottom, 0px)); color-scheme: dark; }
+/* ---------- footer: the page lifts away to show it ---------- */
+footer { position: relative; z-index: 0; overflow: hidden; }
+body.curtain footer { position: sticky; bottom: 0; }
+.foot-wrap { padding-block: clamp(80px, 10vw, 140px) 0; color-scheme: dark; }
 .foot-top { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 48px; align-items: end; padding-bottom: 56px; border-bottom: 1px solid var(--cream-rule); }
-.big-mark { margin: 0; font-family: var(--f-display); font-weight: var(--w-display); font-size: clamp(64px, 12vw, 184px); line-height: .82; letter-spacing: -.03em; }
+.big-mark { margin: 0; font-family: var(--f-display); font-weight: var(--w-display); font-size: clamp(56px, 8vw, 128px); line-height: .9; }
 .big-mark em { color: var(--moss); }
 .signup { display: grid; gap: 14px; }
 .signup label { color: var(--cream-2); }
 .signup .row { display: flex; gap: 8px; flex-wrap: wrap; }
 .signup input {
   flex: 1 1 220px; min-width: 0; font: 16px var(--f-body); color: var(--cream);
-  background: var(--bark-2); border: 1px solid var(--cream-rule); border-radius: 999px; padding: 15px 20px;
+  background: var(--bark-2); border: 1px solid var(--cream-rule); border-radius: 999px; padding: 16px 22px;
   transition: border-color 200ms ease;
 }
 .signup input::placeholder { color: rgba(243,240,230,.5); }
@@ -388,81 +703,147 @@ a { color: inherit; }
 .foot-cols ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .foot-cols a { text-decoration: none; transition: color 200ms ease; }
 .foot-cols a:hover { color: var(--cream); }
-.legal { margin-top: 48px; color: rgba(243,240,230,.5); font-size: 13px; }
+.legal { margin: 48px 0 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; color: rgba(243,240,230,.5); font-size: 13px; }
+.giant {
+  display: flex; margin: 0; padding-top: clamp(24px, 4vw, 56px); white-space: nowrap;
+  font-family: var(--f-display); font-weight: 400; font-size: clamp(64px, 19vw, 340px); line-height: .8; letter-spacing: -.045em;
+  color: var(--moss); overflow: hidden; padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
+}
+.giant span { display: inline-block; transform: translateY(var(--gy, 0%)); }
 
 /* ---------- motion: hidden states only exist once script has run ---------- */
-.js:not(.ready) [data-lines] { opacity: 0; }
+.js:not(.ready) :is([data-lines], [data-chars], [data-words]) { opacity: 0; }
 .ln { display: block; overflow: hidden; padding-bottom: .14em; margin-bottom: -.14em; }
-.ln-i { display: inline-block; will-change: auto; }
-.js [data-lines]:not(.in) .ln-i { transform: translateY(-108%) rotate(-1.5deg); }
-.js [data-lines] .ln-i { transition: transform 1000ms var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms); transform-origin: 0 100%; }
-.js [data-reveal] { transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out), filter 900ms var(--ease-out); transition-delay: var(--d, 0ms); }
-.js [data-reveal]:not(.in) { opacity: 0; transform: translateY(18px); filter: blur(4px); }
-.js [data-stagger] > * { transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out); }
-.js [data-stagger]:not(.in) > * { opacity: 0; transform: translateY(-14px); }
-.js .areas:not(.in) li::before { transform: scaleX(0); }
-.areas li::before { transition: transform 1100ms var(--ease-out); transition-delay: inherit; }
-.js [data-clip] { transition: clip-path 1200ms cubic-bezier(0.77, 0, 0.175, 1); }
-.js [data-clip]:not(.in) { clip-path: inset(100% 0 0 0); }
+.ln-i { display: inline-block; }
+.w { display: inline-block; }
+/* headings: each line rises out of its own mask with a slight lean, then the emphasis inks in */
+.js [data-lines] .ln-i { transition: transform 1200ms var(--ease-out); transition-delay: calc(var(--i, 0) * 90ms + var(--d, 0ms)); transform-origin: 0 100%; }
+.js [data-lines]:not(.in) .ln-i { transform: translateY(108%) skewY(5deg); }
+.js [data-lines] em { transition: color 900ms ease; transition-delay: calc(var(--i, 0) * 90ms + 650ms + var(--d, 0ms)); }
+.js [data-lines]:not(.in) em { color: inherit; }
+/* the hero line: letter by letter, each one standing up from the baseline */
+.ch { display: inline-block; transition: transform 1300ms var(--ease-out), opacity 900ms ease; transition-delay: calc(var(--c) * 26ms + var(--d, 0ms)); transform-origin: 0 100%; }
+.js [data-chars]:not(.in) .ch { transform: translateY(112%) rotate(8deg); }
+/* paragraphs: words surface out of a soft blur */
+.wd { display: inline-block; transition: opacity 900ms ease, transform 1000ms var(--ease-out), filter 900ms ease; transition-delay: calc(var(--k) * 12ms + var(--d, 0ms)); }
+.js [data-words]:not(.in) .wd { opacity: 0; transform: translateY(.35em); filter: blur(6px); }
+/* statement and quote: words light up as you scroll through them */
+[data-fill] .fw { opacity: var(--o, 1); transition: opacity 200ms linear; }
+.js [data-reveal] { transition: opacity 1000ms var(--ease-out), transform 1000ms var(--ease-out); transition-delay: var(--d, 0ms); }
+.js [data-reveal]:not(.in) { opacity: 0; transform: translateY(24px); }
+.js [data-stagger] > * { transition: opacity 800ms var(--ease-out), transform 900ms var(--ease-out); }
+.js [data-stagger]:not(.in) > * { opacity: 0; transform: translateY(18px); }
+.js :is(.months, .areas, .perks):not(.in) li::after { transform: scaleX(0); }
+/* rectangular photos: a moss-green curtain sweeps up and away, the picture settles behind it */
+.js .wipe::after { content: ""; position: absolute; inset: 0; z-index: 2; background: var(--moss-deep); transform: scaleY(0); transform-origin: 50% 100%; pointer-events: none; }
+.shade .wipe::after { background: var(--moss); }
+.js .wipe:not(.in) .frame-in { opacity: 0; }
+.js .wipe.in::after { animation: curtain 1300ms var(--ease-curtain) forwards; animation-delay: var(--d, 0ms); }
+.js .wipe.in .frame-in { animation: show 1ms linear forwards, settle 1800ms var(--ease-out) forwards; animation-delay: calc(var(--d, 0ms) + 640ms); opacity: 0; }
+@keyframes curtain { 0% { transform: scaleY(0); transform-origin: 50% 100%; } 49.9% { transform: scaleY(1); transform-origin: 50% 100%; } 50% { transform: scaleY(1); transform-origin: 50% 0; } 100% { transform: scaleY(0); transform-origin: 50% 0; } }
+@keyframes show { to { opacity: 1; } }
+@keyframes settle { from { transform: scale(1.25); } to { transform: none; } }
+/* arched photos: the doorway opens upward from the threshold */
+.js .rise { transition: clip-path 1600ms var(--ease-curtain); transition-delay: var(--d, 0ms); }
+.js .rise:not(.in) { clip-path: inset(100% 0 0 0); }
+.js .rise .frame-in { transition: transform 2200ms var(--ease-out); transition-delay: var(--d, 0ms); }
+.js .rise:not(.in) .frame-in { transform: scale(1.3); }
+.js .arch-line:not(.in)::before { opacity: 0; transform: translateY(16px); }
 
-@media (max-width: 960px) {
-  .seasons .inner, .grounds .inner, .membership .inner, .foot-top, .visit-head, .journal-grid { grid-template-columns: minmax(0, 1fr); }
-  .seasons-head, .grounds-map { position: static; }
-  .visit-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-  .visit-grid .ph { grid-column: 1 / -1; }
+@media (max-width: 1020px) {
+  .sec-head, .seasons-body, .grounds-body, .membership .inner, .foot-top, .journal-grid, .visit-panels { grid-template-columns: minmax(0, 1fr); }
+  .sec-head .lead { justify-self: start; }
+  .map-wrap { position: static; }
+  .season-frame-wrap { position: relative; top: auto; max-width: 520px; }
+  .visit-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "gate gate" "a b" "c d"; }
+  .visit-stage .gate-wrap { max-width: 420px; width: 100%; justify-self: center; }
+  .vfact:nth-of-type(n) { justify-self: start; text-align: left; align-self: start; }
+  .links-svg { display: none; }
   .foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .member-ph-wrap { margin-inline: 8% 0; }
+  .member-media { margin-inline: 12% 0; max-width: 560px; }
 }
-@media (max-width: 560px) {
+@media (max-width: 600px) {
   :root { --nav-h: 64px; }
-  .wordmark { font-size: 24px; }
+  body { font-size: 16px; }
+  .wordmark { font-size: 23px; }
+  .site-nav.solid .bar { height: 56px; padding-left: 18px; padding-right: 6px; }
   .hero-side { justify-items: start; text-align: left; }
   .hint { display: none; }
-  .btn { padding: 14px 18px; font-size: 14.5px; }
+  .btn { padding: 15px 20px; font-size: 14.5px; }
   .hero .scrim {
     background:
       linear-gradient(180deg, rgba(var(--scrim), .7) 0%, rgba(var(--scrim), .35) 34%, rgba(var(--scrim), 0) 44%),
       linear-gradient(0deg, rgba(var(--scrim), .9) 0%, rgba(var(--scrim), .5) 26%, rgba(var(--scrim), 0) 36%);
   }
-  .visit-grid { grid-template-columns: minmax(0, 1fr); }
-  .side-posts .post { grid-template-columns: minmax(0, 1fr); }
-  .months button { grid-template-columns: 48px minmax(0, 1fr); }
-  .months .where { grid-column: 2; }
-  .interlude { height: 150vh; }
+  .months button { grid-template-columns: 44px minmax(0, 1fr) 16px; gap: 4px 12px; padding: 16px 6px; }
+  .months .where { grid-column: 2; grid-row: 2; text-align: left; }
+  .months .arr { grid-column: 3; grid-row: 1; }
+  .visit-stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "gate" "a" "b" "c" "d"; gap: 24px; }
+  .vfact { max-width: none; padding-top: 18px; border-top: 1px solid var(--rule); }
+  .vfact b { font-size: 48px; }
+  .perks { grid-template-columns: minmax(0, 1fr); }
+  .side-posts .post { grid-template-columns: minmax(0, 1fr) 120px; gap: 16px; }
+  .tix li { grid-template-columns: minmax(0, 1fr) auto; }
+  .tix .each { grid-column: 1; grid-row: 2; margin-top: -8px; }
+  .tix .step { grid-row: 1 / 3; grid-column: 2; }
+  .interlude { height: 160vh; }
+  .mq li { font-size: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ticker-track { animation: none; flex-wrap: wrap; width: auto; }
-  .ticker-track ul + ul { display: none; }
-  .ticker ul { flex-wrap: wrap; padding-inline: 16px; }
-  .js [data-lines] .ln-i, .js [data-lines]:not(.in) .ln-i { transform: none; transition: none; }
-  .js [data-reveal], .js [data-reveal]:not(.in) { transform: none; filter: none; transition: opacity 400ms ease; }
+  .intro { display: none; }
+  .js [data-lines] .ln-i, .js [data-lines]:not(.in) .ln-i, .ch, .js [data-chars]:not(.in) .ch { transform: none; transition: none; }
+  .js [data-lines]:not(.in) em { color: var(--petal-deep); }
+  .wd, .js [data-words]:not(.in) .wd { opacity: 1; transform: none; filter: none; transition: none; }
+  .js [data-reveal], .js [data-reveal]:not(.in) { transform: none; transition: opacity 400ms ease; }
   .js [data-stagger] > *, .js [data-stagger]:not(.in) > * { transform: none; transition: opacity 400ms ease; }
-  .js [data-clip], .js [data-clip]:not(.in) { clip-path: none; transition: none; }
-  .js .areas:not(.in) li::before { transform: none; }
+  .js .wipe::after { display: none; }
+  .js .wipe .frame-in, .js .wipe.in .frame-in { opacity: 1; animation: none; }
+  .js .rise, .js .rise:not(.in) { clip-path: none; transition: none; }
+  .js .rise:not(.in) .frame-in { transform: none; }
+  .js :is(.months, .areas, .perks):not(.in) li::after { transform: none; }
+  .js .perks:not(.in) svg path { stroke-dashoffset: 0; }
+  .js .map:not(.in) .draw { stroke-dashoffset: 0; }
+  .js .map:not(.in) .pop { opacity: 1; transform: none; }
   .menu, .menu.open { transition: visibility 0s, opacity 200ms ease; clip-path: none; }
   .menu:not(.open) { opacity: 0; }
-  .menu ul a span { transform: none; transition: opacity 200ms ease; }
+  .menu ul a span { transform: none; transition: none; }
   .interlude { height: auto; }
   .interlude-stick { position: relative; height: 80vh; }
-  .site-nav, .btn, .garden, .hint { transition: none; }
+  .site-nav, .site-nav .bar, .btn, .btn::before, .garden, .hint, .mcard { transition: none; }
+  .live-dot { animation: none; }
+  .season-frame .layer.enter, .season-frame .layer.enter img { animation: none; }
+  .mq-track { flex-wrap: wrap; width: auto; }
+  .mq ul { flex-wrap: wrap; padding-inline: 16px; }
+  .js .map:not(.in) .route { opacity: 1; }
 }
 </style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-inner">
+    <p class="intro-mark"><span style="--c:0">H</span><span style="--c:1">o</span><span style="--c:2">l</span><span style="--c:3">l</span><span style="--c:4">o</span><span style="--c:5">w</span><span style="--c:6">m</span><span style="--c:7">e</span><span style="--c:8">r</span><span style="--c:9">e</span></p>
+    <p class="intro-meta data">WOODLAND GARDEN · ASHCOMBE · EST. 1911</p>
+    <i class="intro-bar"><b></b></i>
+  </div>
+</div>
+
 <!-- ======== navigation ======== -->
 <header class="site-nav" id="siteNav">
   <div class="bar wrap">
-    <a class="wordmark" href="#top">Hollowmere</a>
+    <a class="wordmark" href="#top">
+      <svg width="20" height="22" viewBox="0 0 20 22" fill="none" aria-hidden="true"><path d="M10 21V9M10 13c-4.5 0-7-3-7-8 4.5 0 7 3 7 8Zm0-3c0-4.5 2.5-8 7-8 0 5-2.5 8-7 8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      Hollowmere</a>
     <nav aria-label="Main">
-      <ul class="links">
+      <ul class="links" id="links">
         <li><a href="#seasons">Seasons</a></li>
         <li><a href="#grounds">The grounds</a></li>
         <li><a href="#visit">Visit</a></li>
         <li><a href="#membership">Membership</a></li>
         <li><a href="#journal">Journal</a></li>
+        <li aria-hidden="true" class="pill" id="pill"></li>
       </ul>
     </nav>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch to dark mode">
@@ -497,87 +878,161 @@ a { color: inherit; }
 
 <!-- ======== hero ======== -->
 <section class="hero" id="top" aria-label="Hollowmere Garden">
-  <img class="bare" id="bareImg" src="assets/bare.jpg" alt="A bare tree branch against a soft, blurred woodland">
+  <picture><source srcset="assets/night-bare.webp" media="(prefers-color-scheme: dark)"><img class="bare" id="bareImg" src="assets/bare.webp" fetchpriority="high" alt="A bare tree branch against a soft, blurred woodland"></picture>
   <canvas class="garden" id="garden" aria-hidden="true"></canvas>
   <div class="scrim"></div>
+  <div class="hero-veil" id="heroVeil"></div>
   <div aria-hidden="true"></div>
   <div class="hero-top wrap" id="heroTop">
-    <h1 data-lines>Something is <em>always</em> in bloom.</h1>
+    <h1 data-chars>Something is <em>always</em> in bloom.</h1>
   </div>
   <div></div>
   <div class="hero-bottom wrap" id="heroBottom">
-    <div class="hero-act" data-reveal style="--d:500ms">
-      <p class="lead">Bare wood in winter, moss and wildflowers by spring. Walk forty acres of woodland and meadow that change with every month of the year.</p>
-      <div class="ctas">
+    <div class="hero-act">
+      <p class="lead" data-words style="--d:500ms">Bare wood in winter, moss and wildflowers by spring. Walk forty acres of woodland and meadow that change with every month of the year.</p>
+      <div class="ctas" data-reveal style="--d:900ms">
         <a class="btn btn-solid" href="#visit">Plan your visit
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <a class="btn btn-line" href="#seasons">See what's in flower</a>
       </div>
     </div>
-    <div class="hero-side" data-reveal style="--d:700ms">
+    <div class="hero-side" data-reveal style="--d:1100ms">
       <p class="hint data" id="hint"><i></i><span id="hintText">Move along the branch</span></p>
-      <p class="today data" style="margin:0"><b>Open today</b> 09:00–16:30</p>
+      <p class="today data" style="margin:0"><span class="live-dot" data-live-dot></span><span><b data-open-word>Open today</b> <span data-open-hours>09:00–16:30</span></span></p>
     </div>
   </div>
 </section>
 
 <main id="main">
 
-<!-- ticker -->
-<div class="ticker" aria-label="In flower this week">
-  <div class="ticker-track">
-    <ul>
-      <li><span class="data">THIS WEEK</span></li>
-      <li>Witch hazel by the east gate</li><li>Hellebores in the Walled Garden</li><li>Holly berries along Long Meadow</li>
-      <li>Hair-cap moss on the north wall</li><li>Winter box by the glasshouse door</li><li>Cyclamen under the beeches</li>
-    </ul>
-    <ul aria-hidden="true">
-      <li><span class="data">THIS WEEK</span></li>
-      <li>Witch hazel by the east gate</li><li>Hellebores in the Walled Garden</li><li>Holly berries along Long Meadow</li>
-      <li>Hair-cap moss on the north wall</li><li>Winter box by the glasshouse door</li><li>Cyclamen under the beeches</li>
-    </ul>
+<!-- ======== opening statement ======== -->
+<section class="about wrap" aria-label="About the garden">
+  <div class="inner">
+    <p class="manifesto" data-fill>Hollowmere is forty acres <span class="inlay" aria-hidden="true"><img src="assets/pills/meadow.webp" alt="" loading="lazy"></span> of woodland and meadow on the edge of Ashcombe. Nothing is planted for <em>one big week.</em> Something flowers <span class="inlay" aria-hidden="true"><img src="assets/pills/bluebells.webp" alt="" loading="lazy"></span> on every day of the year, and the gates are open on all of them.</p>
+    <div class="about-foot" data-reveal>
+      <span class="data" data-scramble>THE HOLLOWMERE GARDEN TRUST · SINCE 1911</span>
+      <a class="btn btn-line" href="#grounds">Walk the grounds
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
   </div>
-</div>
+</section>
 
 <!-- ======== 1. seasons ======== -->
 <section class="seasons wrap" id="seasons" aria-labelledby="seasonsTitle">
   <div class="inner">
-    <div class="seasons-head">
+    <div class="sec-head">
       <h2 class="display" id="seasonsTitle" data-lines>Twelve months, <em>twelve gardens.</em></h2>
-      <p class="lead" data-reveal>Nothing here is planted for one big week. Pick a month to see what you would walk past.</p>
-      <figure class="ph r-4x5 month-ph" data-grow data-clip style="--x1:35%;--y1:30%">
-        <div class="ph-img" data-inner></div>
-        <figcaption>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          <span><span id="monthCaption">Image: witch hazel in frost by the east gate</span><small>PORTRAIT 4:5 · CHANGES WITH THE MONTH</small></span>
-        </figcaption>
-      </figure>
+      <p class="lead" data-words>Nothing here is planted for one big week. Pick a month to see what you would walk past.</p>
     </div>
-    <ul class="months" id="months" data-stagger></ul>
+    <div class="seasons-body">
+      <div class="season-frame-wrap arch-line" data-watch>
+        <figure class="frame arch season-frame rise" id="seasonFrame" aria-live="polite">
+          <div class="frame-in" id="seasonLayers"></div>
+          <figcaption class="season-cap" id="seasonCap"><span class="data" id="seasonM">JAN</span><b id="seasonWhat">Witch hazel and hellebores</b><span id="seasonWhere">East gate</span></figcaption>
+          <span class="chip" id="seasonChip"><i></i><span>Stand-in photo · month-01.jpg</span></span>
+        </figure>
+      </div>
+      <ul class="months" id="months" data-stagger aria-label="Months"></ul>
+    </div>
   </div>
 </section>
+
+<div class="stem wrap" data-stem aria-hidden="true">
+  <svg viewBox="0 0 1200 120" preserveAspectRatio="none"></svg>
+  <span class="data">THE GATE · 4 MIN TO MOSS HOLLOW</span>
+</div>
 
 <!-- ======== 2. grounds ======== -->
 <section class="grounds wrap" id="grounds" aria-labelledby="groundsTitle">
   <div class="inner">
-    <figure class="ph r-5x4 grounds-map" data-grow data-clip style="--x1:60%;--y1:45%;--x2:25%;--y2:70%">
-      <div class="ph-img" data-inner></div>
-      <figcaption>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 3.5 5.5 2l5 1.5 4-1.5v10.5l-4 1.5-5-1.5-4 1.5z M5.5 2v10.5 M10.5 3.5V14" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-        <span>Image: illustrated map of the six areas, gate at the bottom left<small>LANDSCAPE 5:4 · ILLUSTRATION</small></span>
-      </figcaption>
-    </figure>
-    <div class="grounds-copy">
+    <div class="sec-head">
       <h2 class="display" id="groundsTitle" data-lines>Forty acres, <em>six ways in.</em></h2>
-      <p class="lead" data-reveal>Every path loops back to the gate. The longest walk takes about an hour if you stop to look, and most people stop.</p>
-      <ul class="areas" data-stagger>
-        <li><h3>Moss Hollow</h3><span class="data">4 MIN</span><p>A sunken path under old oaks, with fifty kinds of moss on stone and bark.</p></li>
-        <li><h3>Long Meadow</h3><span class="data">9 MIN</span><p>Grasses and wildflowers mown once a year, with a bench at the top for the view.</p></li>
-        <li><h3>Fern Gully</h3><span class="data">12 MIN</span><p>A cool stream valley where tree ferns stay green through winter.</p></li>
-        <li><h3>The Walled Garden</h3><span class="data">15 MIN</span><p>Brick walls hold the warmth for roses, figs and early hellebores.</p></li>
-        <li><h3>Lily Ponds</h3><span class="data">18 MIN</span><p>Three still ponds, dragonflies in summer and herons all year.</p></li>
-        <li><h3>The Glasshouse</h3><span class="data">22 MIN</span><p>A Victorian palm house that stays at 18°C, even in January.</p></li>
+      <p class="lead" data-words>Every path loops back to the gate. The longest walk takes about an hour if you stop to look, and most people stop.</p>
+    </div>
+    <div class="grounds-body">
+      <div class="map-wrap">
+        <figure class="frame map" id="map" data-photo="grounds-map" aria-label="Illustrated map of the grounds">
+          <div class="frame-in" id="mapPhoto"></div>
+          <svg viewBox="0 0 600 480" role="img" aria-labelledby="mapTitle">
+            <title id="mapTitle">Map of the six areas, with paths from the gate in the bottom left</title>
+            <g class="draw-only">
+              <path class="contour draw" style="--dd:0ms" d="M-10 70 C90 30 220 46 330 30 C450 14 540 40 610 30"/>
+              <path class="contour draw" style="--dd:120ms" d="M-10 220 C40 200 60 120 150 100 C230 82 280 210 380 200 C470 190 520 110 610 120"/>
+              <path class="contour draw" style="--dd:240ms" d="M-10 300 C60 290 90 250 180 260 C260 270 300 390 420 420 C500 440 560 410 610 420"/>
+              <path class="contour draw" style="--dd:360ms" d="M240 470 C300 450 330 440 400 450 C470 460 520 470 610 460"/>
+              <!-- stream through Fern Gully -->
+              <path class="ink draw" style="--dd:300ms" d="M96 96 C128 130 100 170 116 210 C130 246 104 276 96 300"/>
+            </g>
+            <g id="routes">
+              <path class="route" data-route="0" data-pd="M170 374 C185 350 205 335 210 322 C215 300 212 280 207 264 C195 240 165 230 152 216 C138 200 132 182 128 164 C124 148 112 128 103 112" d="M70 440 C100 420 124 398 152 370"/>
+              <path class="route" data-route="1" data-pd="M170 374 C190 340 230 312 261 304 C278 280 282 240 280 204 C278 180 278 160 280 137 C284 118 296 102 307 94" d="M70 440 C140 420 190 360 230 300 C258 252 280 210 298 168"/>
+              <path class="route" data-route="2" data-pd="M170 374 C190 340 230 312 261 304 C290 270 320 200 352 180 C390 170 410 182 428 186 C470 196 520 206 548 214" d="M70 440 C58 400 78 336 98 304 C108 288 112 272 114 258"/>
+              <path class="route" data-route="3" data-pd="M170 374 C190 340 230 312 261 304 C290 300 330 318 377 322" d="M70 440 C150 456 228 412 270 340"/>
+              <path class="route" data-route="4" data-pd="M170 374 C190 352 225 345 255 349 C280 352 296 368 307 377 C318 386 330 394 343 398" d="M70 440 C200 470 330 440 380 404 C408 384 428 372 444 366"/>
+              <path class="route" data-route="5" data-pd="M170 374 C200 360 240 362 262 384 C290 412 320 440 352 448 C400 458 440 456 474 452 C490 450 504 446 513 441" d="M70 440 C200 460 360 420 420 330 C450 286 478 240 496 196"/>
+            </g>
+            <g class="draw-only">
+              <g class="area pop" data-area="0" style="--dd:500ms">
+                <path class="shape" d="M118 330 C122 300 176 290 212 304 C242 318 240 360 214 374 C186 390 128 382 118 352 Z"/>
+                <circle class="tree" cx="150" cy="318" r="5"/><circle class="tree" cx="178" cy="310" r="6"/><circle class="tree" cx="202" cy="330" r="5"/><circle class="tree" cx="168" cy="350" r="4"/><circle class="tree" cx="140" cy="348" r="5"/>
+                <text class="label" x="128" y="404">Moss Hollow</text><text class="mins" x="128" y="418">4 MIN</text>
+              </g>
+              <g class="area pop" data-area="1" style="--dd:620ms">
+                <path class="shape" d="M200 120 C204 70 290 52 360 62 C420 72 442 110 420 140 C398 170 300 172 240 160 C214 154 198 140 200 120 Z"/>
+                <path class="ink" d="M240 100 l4 -8 M262 120 l4 -8 M300 92 l4 -8 M330 128 l4 -8 M360 98 l4 -8 M390 120 l4 -8 M280 144 l4 -8"/>
+                <rect class="gate" x="352" y="80" width="14" height="3" rx="1"/>
+                <text class="label" x="252" y="40">Long Meadow</text><text class="mins" x="368" y="40">9 MIN</text>
+              </g>
+              <g class="area pop" data-area="2" style="--dd:740ms">
+                <path class="shape" d="M74 250 C62 210 80 160 108 132 C128 112 154 118 150 146 C146 180 132 220 120 252 C110 276 80 276 74 250 Z"/>
+                <path class="ink" d="M92 176 q8 -10 16 0 M118 160 q8 -10 16 0 M100 220 q8 -10 16 0 M122 200 q6 -8 12 0"/>
+                <text class="label" x="22" y="112">Fern Gully</text><text class="mins" x="22" y="126">12 MIN</text>
+              </g>
+              <g class="area pop" data-area="3" style="--dd:860ms">
+                <rect class="shape" x="270" y="250" width="124" height="92" rx="3"/>
+                <path class="ink" d="M332 256 V336 M276 296 H388"/>
+                <circle class="tree" cx="300" cy="274" r="6"/><circle class="tree" cx="364" cy="274" r="6"/><circle class="tree" cx="300" cy="318" r="6"/><circle class="tree" cx="364" cy="318" r="6"/>
+                <text class="label" x="270" y="238">The Walled Garden</text><text class="mins" x="270" y="362">15 MIN</text>
+              </g>
+              <g class="area pop" data-area="4" style="--dd:980ms">
+                <circle class="water" cx="472" cy="330" r="22"/><circle class="water" cx="514" cy="366" r="16"/><circle class="water" cx="458" cy="386" r="12"/>
+                <rect class="shape" x="444" y="300" width="96" height="104" rx="48" style="fill:transparent;stroke-dasharray:3 4"/>
+                <text class="label" x="470" y="428">Lily Ponds</text><text class="mins" x="470" y="442">18 MIN</text>
+              </g>
+              <g class="area pop" data-area="5" style="--dd:1100ms">
+                <path class="shape" d="M470 192 V168 A30 22 0 0 1 530 168 V192 Z"/>
+                <path class="ink" d="M485 192 V158 M500 192 V146 M515 192 V158 M470 178 H530"/>
+                <text class="label" x="452" y="226">The Glasshouse</text><text class="mins" x="452" y="240">22 MIN</text>
+              </g>
+              <g class="pop" style="--dd:300ms">
+                <path class="ink" d="M58 440 V426 a12 12 0 0 1 24 0 V440 M64 440 V428 M70 440 V424 M76 440 V428" />
+                <text class="label" x="92" y="452">The gate</text>
+                <path class="ink" d="M560 444 V412 M560 412 l-5 10 M560 412 l5 10" /><text class="mins" x="556" y="460">N</text>
+              </g>
+            </g>
+            <circle class="walker" id="walker" r="6" cx="70" cy="440"/>
+          </svg>
+          <div class="map-pins" id="mapPins" aria-hidden="true">
+            <span class="pin gate-pin" style="--x:28.4%;--y:84%">The gate</span>
+            <span class="pin" data-area="0" style="--x:17%;--y:20%">Moss Hollow</span>
+            <span class="pin" data-area="1" style="--x:53%;--y:30%">Long Meadow</span>
+            <span class="pin end" data-area="2" style="--x:97%;--y:30%">Fern Gully</span>
+            <span class="pin" data-area="3" style="--x:76%;--y:45%">The Walled Garden</span>
+            <span class="pin" data-area="4" style="--x:58%;--y:92%">Lily Ponds</span>
+            <span class="pin end" data-area="5" style="--x:97%;--y:75%">The Glasshouse</span>
+          </div>
+        </figure>
+        <div class="map-key" aria-hidden="true"><span><i></i>Paths from the gate</span><span><i class="on"></i>The route you picked</span></div>
+      </div>
+      <ul class="areas" id="areas" data-stagger>
+        <li><button class="area-btn" type="button" data-area="0" aria-pressed="false" style="--walk:14px"><span class="area-name">Moss Hollow</span><span class="data"><i></i>4 MIN</span><p>A sunken path under old oaks, with fifty kinds of moss on stone and bark.</p></button></li>
+        <li><button class="area-btn" type="button" data-area="1" aria-pressed="false" style="--walk:30px"><span class="area-name">Long Meadow</span><span class="data"><i></i>9 MIN</span><p>Grasses and wildflowers mown once a year, with a bench at the top for the view.</p></button></li>
+        <li><button class="area-btn" type="button" data-area="2" aria-pressed="false" style="--walk:40px"><span class="area-name">Fern Gully</span><span class="data"><i></i>12 MIN</span><p>A cool stream valley where tree ferns stay green through winter.</p></button></li>
+        <li><button class="area-btn" type="button" data-area="3" aria-pressed="false" style="--walk:50px"><span class="area-name">The Walled Garden</span><span class="data"><i></i>15 MIN</span><p>Brick walls hold the warmth for roses, figs and early hellebores.</p></button></li>
+        <li><button class="area-btn" type="button" data-area="4" aria-pressed="false" style="--walk:60px"><span class="area-name">Lily Ponds</span><span class="data"><i></i>18 MIN</span><p>Three still ponds, dragonflies in summer and herons all year.</p></button></li>
+        <li><button class="area-btn" type="button" data-area="5" aria-pressed="false" style="--walk:74px"><span class="area-name">The Glasshouse</span><span class="data"><i></i>22 MIN</span><p>A Victorian palm house that stays at 18°C, even in January.</p></button></li>
       </ul>
     </div>
   </div>
@@ -586,66 +1041,109 @@ a { color: inherit; }
 <!-- ======== 3. interlude ======== -->
 <section class="interlude" aria-label="The north wall">
   <div class="interlude-stick">
-    <figure class="ph" id="interludePh" style="--x1:50%;--y1:55%;--x2:20%;--y2:30%">
-      <div class="ph-img" data-inner></div>
-      <figcaption>
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-        <span>Image: close-up of moss on the north wall, morning light<small>FULL BLEED · 16:9 OR WIDER</small></span>
-      </figcaption>
+    <figure class="frame" id="interludePh">
+      <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/north-wall.avif"><img src="assets/photos/north-wall.webp" data-photo="north-wall" decoding="async" alt="Moss and lichen on the north wall" loading="lazy"></picture></div>
     </figure>
-    <p class="interlude-quote" id="interludeQuote"><span data-lines>Ninety kinds of moss grow on <em>one wall.</em></span><span class="data" data-reveal>WE HAVE NOT CLEANED IT SINCE 1911</span></p>
+    <div class="inter-copy">
+      <p class="interlude-quote" data-fill="scrub">Ninety kinds of moss grow on <em>one wall.</em></p>
+      <span class="data" data-scramble>WE HAVE NOT CLEANED IT SINCE 1911</span>
+    </div>
   </div>
 </section>
+
+<!-- ======== in flower this week ======== -->
+<div class="mq" aria-label="In flower this week">
+  <div class="mq-head wrap"><span class="data">IN FLOWER THIS WEEK</span><span class="data" id="mqWeek"></span></div>
+  <div class="mq-track" id="mqTrack">
+    <ul>
+      <li><span>Witch hazel by the east gate</span><i class="thumb"><img src="assets/pills/witch.webp" alt="" loading="lazy"></i></li>
+      <li><span>Hellebores in the Walled Garden</span><i class="thumb"><img src="assets/pills/snowdrop.webp" alt="" loading="lazy"></i></li>
+      <li><span>Holly berries along Long Meadow</span><i class="thumb"><img src="assets/pills/holly.webp" alt="" loading="lazy"></i></li>
+      <li><span>Hair-cap moss on the north wall</span><i class="thumb"><img src="assets/pills/moss.webp" alt="" loading="lazy"></i></li>
+      <li><span>Winter box by the glasshouse door</span><i class="thumb"><img src="assets/pills/seed.webp" alt="" loading="lazy"></i></li>
+      <li><span>Cyclamen under the beeches</span><i class="thumb"><img src="assets/pills/bluebells.webp" alt="" loading="lazy"></i></li>
+    </ul>
+  </div>
+</div>
 
 <!-- ======== 4. visit ======== -->
 <section class="visit wrap" id="visit" aria-labelledby="visitTitle">
   <div class="inner">
-    <div class="visit-head">
+    <div class="sec-head">
       <h2 class="display" id="visitTitle" data-lines>Open <em>every day</em> of the year.</h2>
-      <p class="lead" data-reveal>Christmas Day included. Book ahead on weekends in April and May, when the bluebells bring everyone.</p>
+      <p class="lead" data-words>Christmas Day included. Book ahead on weekends in April and May, when the bluebells bring everyone.</p>
     </div>
-    <div class="visit-grid">
-      <figure class="ph r-4x5" data-grow data-clip style="--x1:40%;--y1:60%">
-        <div class="ph-img" data-inner></div>
-        <figcaption>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          <span>Image: the iron east gate, half open, path behind it<small>PORTRAIT 4:5</small></span>
-        </figcaption>
-      </figure>
-      <div class="facts" data-reveal>
-        <h3>Opening hours</h3>
-        <dl>
-          <dt>March to October</dt><dd>09:00–18:00</dd>
-          <dt>November to February</dt><dd>09:00–16:30</dd>
-          <dt>Last entry</dt><dd>1 hr before</dd>
+
+    <div class="visit-stage" id="visitStage">
+      <div class="vfact"><b data-count>09:00</b><span>Gates open every morning, all year round</span></div>
+      <div class="vfact"><b data-count>£14</b><span>An adult ticket. Under-fives and members walk in free</span></div>
+      <div class="vfact"><b data-count>20 min</b><span>By bus from Ashcombe station, stop outside the gate</span></div>
+      <div class="vfact"><b data-count>120</b><span>Parking spaces, free for ticket holders</span></div>
+      <div class="gate-wrap arch-line" data-watch>
+        <figure class="frame arch r-4x5 rise" style="--d:150ms">
+          <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/visit-gate.avif"><img src="assets/photos/visit-gate.webp" data-photo="visit-gate" decoding="async" alt="The iron east gate, half open, with the path behind it" loading="lazy"></picture></div>
+        </figure>
+      </div>
+      <svg class="links-svg" id="linksSvg" aria-hidden="true"></svg>
+    </div>
+
+    <div class="visit-panels">
+      <article class="panel" data-watch aria-labelledby="hoursTitle">
+        <div class="panel-head">
+          <h3 id="hoursTitle">Opening hours</h3>
+          <span class="status" id="status"><span class="live-dot" data-live-dot></span><span id="statusText"><b>Open now</b></span></span>
+        </div>
+        <div class="dayline" aria-hidden="true">
+          <div class="dayline-track" id="dayTrack"><div class="dayline-open"></div><div class="dayline-now" id="dayNow"></div></div>
+          <div class="dayline-ticks data"><span>06:00</span><span>09:00</span><span>12:00</span><span>15:00</span><span>18:00</span><span>21:00</span></div>
+        </div>
+        <dl class="hours" id="hoursList">
+          <dt data-season="summer">March to October</dt><dd data-season="summer">09:00–18:00</dd>
+          <dt data-season="winter">November to February</dt><dd data-season="winter">09:00–16:30</dd>
+          <dt>Last entry</dt><dd>1 hr before closing</dd>
           <dt>Members' early hour</dt><dd>Sat 07:30</dd>
         </dl>
-        <p class="visit-note">Dogs on short leads are welcome everywhere except the Glasshouse.</p>
-      </div>
-      <div class="facts" data-reveal style="--d:120ms">
-        <h3>Tickets</h3>
-        <dl>
-          <dt>Adult</dt><dd>£14.00</dd>
-          <dt>Child, 5 to 16</dt><dd>£6.00</dd>
-          <dt>Under 5</dt><dd>Free</dd>
-          <dt>Members</dt><dd>Free</dd>
-        </dl>
-        <p class="visit-note">Twenty minutes by bus from Ashcombe station. Parking for 120 cars, free for ticket holders.</p>
-        <a class="btn btn-solid" href="#visit">Book tickets
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
+        <p class="panel-note">Times are UK time. Dogs on short leads are welcome everywhere except the Glasshouse.</p>
+      </article>
+
+      <article class="panel ticket" data-watch aria-labelledby="ticketTitle">
+        <h3 id="ticketTitle">Tickets</h3>
+        <ul class="tix" id="tix">
+          <li data-price="14"><span class="who">Adult</span><span class="each">£14.00</span><span class="step"><button type="button" data-d="-1" aria-label="One fewer adult">−</button><output id="q-adult" aria-live="polite">2</output><button type="button" data-d="1" aria-label="One more adult">+</button></span></li>
+          <li data-price="6"><span class="who">Child<small>5 to 16</small></span><span class="each">£6.00</span><span class="step"><button type="button" data-d="-1" aria-label="One fewer child">−</button><output id="q-child" aria-live="polite">1</output><button type="button" data-d="1" aria-label="One more child">+</button></span></li>
+          <li data-price="0"><span class="who">Under 5</span><span class="each">Free</span><span class="step"><button type="button" data-d="-1" aria-label="One fewer under-five">−</button><output id="q-under5" aria-live="polite">0</output><button type="button" data-d="1" aria-label="One more under-five">+</button></span></li>
+        </ul>
+        <p class="panel-note">Members walk in free. Twenty minutes by bus from Ashcombe station, and parking is free with a ticket.</p>
+        <div class="tear" aria-hidden="true"></div>
+        <div class="ticket-foot">
+          <div class="total"><span class="data">TOTAL FOR <span id="tixCount">3</span> PEOPLE</span><b id="tixTotal">£34.00</b></div>
+          <button class="btn btn-solid" type="button" id="bookBtn">Book tickets
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3.5 13.5 8 9 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <output class="msg" id="bookMsg" aria-live="polite"></output>
+      </article>
     </div>
   </div>
 </section>
 
 <!-- ======== 5. membership ======== -->
 <section class="membership shade wrap" id="membership" aria-labelledby="memberTitle">
+  <div class="dome" id="dome" aria-hidden="true"></div>
   <div class="inner">
     <div class="member-copy">
       <h2 class="display" id="memberTitle" data-lines>A year of <em>early mornings.</em></h2>
-      <p class="lead" data-reveal>Members walk in before the gates open, when the mist is still on the meadow and the only footprints are the deer's.</p>
-      <div class="price" data-reveal><b>£68</b><span>a year, for two adults<br>and up to three children</span></div>
+      <p class="lead" data-words>Members walk in before the gates open, when the mist is still on the meadow and the only footprints are the deer's.</p>
+      <div class="mcard-wrap" data-reveal>
+        <div class="mcard" id="mcard" role="img" aria-label="Family membership card: £68 a year for two adults and up to three children">
+          <div class="mcard-top"><span>Hollowmere</span>
+            <svg width="22" height="24" viewBox="0 0 20 22" fill="none" aria-hidden="true"><path d="M10 21V9M10 13c-4.5 0-7-3-7-8 4.5 0 7 3 7 8Zm0-3c0-4.5 2.5-8 7-8 0 5-2.5 8-7 8Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="mcard-price"><b>£68</b><span>a year</span></div>
+          <div class="mcard-foot"><span>Family membership<br>Two adults, up to three children</span><span class="data">No. 1911 0427</span></div>
+          <i class="sheen"></i>
+        </div>
+      </div>
       <ul class="perks" data-stagger>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m2 7.5 3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited visits, every day of the year</li>
         <li><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="m2 7.5 3 3 7-7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Early entry from 07:30 on Saturdays</li>
@@ -654,67 +1152,64 @@ a { color: inherit; }
       </ul>
       <div class="ctas" data-reveal><a class="btn btn-solid" href="#membership">Become a member</a><a class="btn btn-line" href="#membership">Give it as a gift</a></div>
     </div>
-    <div class="member-ph-wrap">
-      <figure class="ph r-4x5" data-grow data-clip style="--x1:55%;--y1:35%">
-        <div class="ph-img" data-inner></div>
-        <figcaption>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          <span>Image: mist over Long Meadow at 07:30, one walker<small>PORTRAIT 4:5</small></span>
-        </figcaption>
-      </figure>
-      <figure class="ph r-1x1 small" data-grow data-parallax="-60" style="--x1:30%;--y1:60%;--x2:70%;--y2:30%">
-        <div class="ph-img" data-inner></div>
-        <figcaption>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          <span>Image: member card on a bench<small>SQUARE 1:1</small></span>
-        </figcaption>
+    <div class="member-media">
+      <div class="arch-line" data-watch>
+        <figure class="frame arch r-4x5 rise">
+          <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/member-meadow.avif"><img src="assets/photos/member-meadow.webp" data-photo="member-meadow" decoding="async" alt="Mist over Long Meadow at 07:30, one walker" loading="lazy" data-par="40"></picture></div>
+        </figure>
+      </div>
+      <figure class="frame r-1x1 small wipe" data-watch data-parallax="-70" style="--d:300ms">
+        <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/member-card.avif"><img src="assets/photos/member-card.webp" data-photo="member-card" decoding="async" alt="A membership card on a mossy bench" loading="lazy"></picture></div>
       </figure>
     </div>
+  </div>
+  <div class="stem" data-stem aria-hidden="true" style="margin-top:clamp(64px,8vw,120px)">
+    <svg viewBox="0 0 1200 120" preserveAspectRatio="none"></svg>
   </div>
 </section>
 
 <!-- ======== 6. journal ======== -->
 <section class="journal wrap" id="journal" aria-labelledby="journalTitle">
-  <div class="inner">
-    <div class="journal-head">
+  <div class="inner" style="padding-top:var(--section)">
+    <div class="sec-head">
       <h2 class="display" id="journalTitle" data-lines>Notes from <em>the potting shed.</em></h2>
-      <a class="btn btn-line" href="#journal" data-reveal>Read the journal</a>
+      <div style="justify-self:end" data-reveal><a class="btn btn-line" href="#journal">Read the journal</a></div>
     </div>
     <div class="journal-grid">
-      <a class="post big" href="#journal">
-        <figure class="ph r-3x2" data-grow data-clip style="--x1:45%;--y1:40%">
-          <div class="ph-img" data-inner></div>
-          <figcaption>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="m2 11 3.5-3.5 3 3 2-2L14 12" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-            <span>Image: gardener's hands on a mossy stone<small>LANDSCAPE 3:2</small></span>
-          </figcaption>
+      <a class="post big" href="#journal" id="leadPost">
+        <figure class="frame r-3x2 wipe" data-watch>
+          <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/journal-hands-moss.avif"><img src="assets/photos/journal-hands-moss.webp" data-photo="journal-hands-moss" decoding="async" alt="A gardener's hands on a mossy stone" loading="lazy" data-par="30"></picture></div>
         </figure>
-        <span class="data" data-reveal>14 NOV 2026 · 6 MIN READ</span>
-        <h3 data-lines>Why we never scrub the moss off the north wall</h3>
-        <p data-reveal>It holds water, feeds the wrens and keeps the brick cool in August. A short history of doing nothing on purpose.</p>
+        <span class="data" data-scramble>14 NOV 2026 · 6 MIN READ</span>
+        <h3 data-lines><span class="u">Why we never scrub the moss off the north wall</span></h3>
+        <p data-words>It holds water, feeds the wrens and keeps the brick cool in August. A short history of doing nothing on purpose.</p>
       </a>
-      <div class="side-posts">
-        <a class="post" href="#journal">
-          <figure class="ph r-1x1" data-grow data-clip style="--x1:30%;--y1:30%">
-            <div class="ph-img" data-inner></div>
-            <figcaption><span>Image: snowdrop bulbs in a crate<small>SQUARE 1:1</small></span></figcaption>
-          </figure>
-          <div>
-            <span class="data" data-reveal>28 OCT 2026</span>
-            <h3 data-lines>Planting 4,000 snowdrops in one weekend</h3>
-          </div>
-        </a>
-        <a class="post" href="#journal">
-          <figure class="ph r-1x1" data-grow data-clip style="--x1:60%;--y1:70%">
-            <div class="ph-img" data-inner></div>
-            <figcaption><span>Image: lily pads under a skin of ice<small>SQUARE 1:1</small></span></figcaption>
-          </figure>
-          <div>
-            <span class="data" data-reveal>09 OCT 2026</span>
-            <h3 data-lines>The pond lilies are resting, and so are we</h3>
-          </div>
-        </a>
-      </div>
+      <ul class="side-posts" data-stagger>
+        <li>
+          <a class="post" href="#journal">
+            <div>
+              <span class="data">28 OCT 2026 · 4 MIN READ</span>
+              <h3><span class="u">Planting 4,000 snowdrops in one weekend</span></h3>
+              <p>Forty volunteers, two trowels each and a lot of soup.</p>
+            </div>
+            <figure class="frame r-1x1">
+              <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/journal-snowdrops.avif"><img src="assets/photos/journal-snowdrops.webp" data-photo="journal-snowdrops" decoding="async" alt="Snowdrop bulbs in a crate" loading="lazy"></picture></div>
+            </figure>
+          </a>
+        </li>
+        <li>
+          <a class="post" href="#journal">
+            <div>
+              <span class="data">09 OCT 2026 · 3 MIN READ</span>
+              <h3><span class="u">The pond lilies are resting, and so are we</span></h3>
+              <p>What happens under the ice between November and March.</p>
+            </div>
+            <figure class="frame r-1x1">
+              <div class="frame-in"><picture><source type="image/avif" srcset="assets/photos/journal-ice-lilies.avif"><img src="assets/photos/journal-ice-lilies.webp" data-photo="journal-ice-lilies" decoding="async" alt="Lily pads under a skin of ice" loading="lazy"></picture></div>
+            </figure>
+          </a>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -722,7 +1217,7 @@ a { color: inherit; }
 </main>
 
 <!-- ======== footer ======== -->
-<footer class="shade">
+<footer class="shade" id="footer">
   <div class="foot-wrap wrap">
     <div class="inner">
       <div class="foot-top">
@@ -740,12 +1235,15 @@ a { color: inherit; }
         <div><h4>Find us</h4><ul><li>Hollowmere Lane</li><li>Ashcombe</li><li class="data">AS4 9HL</li></ul></div>
         <div><h4>Visit</h4><ul><li><a href="#visit">Hours and tickets</a></li><li><a href="#grounds">Map of the grounds</a></li><li><a href="#visit">Getting here</a></li><li><a href="#visit">Accessibility</a></li></ul></div>
         <div><h4>Garden</h4><ul><li><a href="#seasons">What's in flower</a></li><li><a href="#journal">Journal</a></li><li><a href="#membership">Membership</a></li><li><a href="#membership">Volunteering</a></li></ul></div>
-        <div><h4>Today</h4><ul><li class="data">09:00–16:30</li><li>Last entry 15:30</li><li>Café open until 16:00</li></ul></div>
+        <div><h4>Today</h4><ul><li class="data" data-open-hours>09:00–16:30</li><li data-last-entry>Last entry 15:30</li><li>Café open until 16:00</li></ul></div>
       </div>
-      <p class="legal">© 2026 Hollowmere Garden Trust. Placeholder content.</p>
+      <p class="legal"><span>© 2026 Hollowmere Garden Trust. Placeholder content.</span><a href="#top">Back to the gate</a></p>
     </div>
   </div>
+  <p class="giant wrap" id="giant" aria-hidden="true"><span>H</span><span>o</span><span>l</span><span>l</span><span>o</span><span>w</span><span>m</span><span>e</span><span>r</span><span>e</span></p>
 </footer>
+
+<div class="cursor-tag" id="cursorTag" aria-hidden="true">Read</div>
 
 <script src="assets/hero.js"></script>
 <script src="assets/site.js"></script>
